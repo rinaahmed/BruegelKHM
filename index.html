@@ -625,6 +625,11 @@
     margin-bottom:14px;
     background:var(--cream);
   }
+  .note-freewrite{
+    border-left:3px solid var(--ochre);
+    background:var(--parchment);
+  }
+  .note-freewrite .note-field-label{margin-top:0;}
   .note-entry-head{
     display:flex;
     align-items:center;
@@ -805,16 +810,24 @@ const state = {
 
 /* notes persistence (localStorage) */
 const NOTES_KEY = 'bruegelKHM.notes.v1';
+const FREEWRITE_KEY = 'bruegelKHM.freewrite.v1';
 let storageOK = true;
 function loadNotes(){
   try{
     const raw = localStorage.getItem(NOTES_KEY);
     if(raw){ const parsed = JSON.parse(raw); if(parsed && typeof parsed==='object') state.notes = parsed; }
+    const fw = localStorage.getItem(FREEWRITE_KEY);
+    if(typeof fw === 'string') state.freeWrite = fw;
   }catch(e){ storageOK = false; }
 }
 function saveNotes(){
   if(!storageOK) return;
   try{ localStorage.setItem(NOTES_KEY, JSON.stringify(state.notes)); }
+  catch(e){ storageOK = false; }
+}
+function saveFreeWrite(){
+  if(!storageOK) return;
+  try{ localStorage.setItem(FREEWRITE_KEY, state.freeWrite || ''); }
   catch(e){ storageOK = false; }
 }
 
@@ -1268,6 +1281,7 @@ const NOTES = {
     intro:'Alle deine Beobachtungen an einem Ort — zum Wiederlesen nach dem Besuch.',
     export:'Exportieren (.txt)',copy:'Kopieren',copied:'Kopiert ✓',
     annotated:'Gemälde mit Notizen',goto:'Zum Gemälde',
+    freeWrite:'Freies Schreiben',gotoPrep:'Zur Vorbereitung',
     empty:'Noch keine Notizen. Öffne ein Gemälde im Bereich Gemälde und schreibe deine Beobachtungen.',
     storageWarn:'Lokaler Speicher ist nicht verfügbar — deine Notizen bestehen nur für diese Sitzung. Exportiere sie, um sie zu behalten.',
     deviceNote:'Notizen werden nur auf diesem Gerät gespeichert.'},
@@ -1275,6 +1289,7 @@ const NOTES = {
     intro:'All your observations in one place — to reread after your visit.',
     export:'Export (.txt)',copy:'Copy',copied:'Copied ✓',
     annotated:'paintings with notes',goto:'Go to painting',
+    freeWrite:'Free Write',gotoPrep:'To Prepare',
     empty:'No notes yet. Open a painting in the Paintings section and write your observations.',
     storageWarn:'Local storage is unavailable — your notes will last only for this session. Export them to keep them.',
     deviceNote:'Notes are stored on this device only.'}
@@ -1593,12 +1608,21 @@ function renderNotebook(){
   h += '<p class="intro">'+esc(t.intro)+'</p>';
   if(!storageOK) h += '<div class="warn">'+esc(t.storageWarn)+'</div>';
   const noted = notedPaintings();
+  const freeWrite = (state.freeWrite || '').trim();
+  const hasContent = noted.length > 0 || freeWrite.length > 0;
   h += '<div class="notes-toolbar">'+
-    '<button class="btn" onclick="exportNotes()"'+(noted.length?'':' disabled')+'>'+esc(t.export)+'</button>'+
-    '<button class="btn ghost" id="copybtn" onclick="copyNotes()"'+(noted.length?'':' disabled')+'>'+esc(t.copy)+'</button>'+
+    '<button class="btn" onclick="exportNotes()"'+(hasContent?'':' disabled')+'>'+esc(t.export)+'</button>'+
+    '<button class="btn ghost" id="copybtn" onclick="copyNotes()"'+(hasContent?'':' disabled')+'>'+esc(t.copy)+'</button>'+
     '<span class="annot-count">'+noted.length+'/12 '+esc(t.annotated)+'</span>'+
   '</div>';
-  if(noted.length===0){ h += '<p class="stub">'+esc(t.empty)+'</p>'; return h; }
+  if(!hasContent){ h += '<p class="stub">'+esc(t.empty)+'</p>'; return h; }
+  if(freeWrite){
+    h += '<div class="note-entry note-freewrite">'+
+      '<p class="note-field-label">✎ '+esc(t.freeWrite)+'</p>'+
+      '<p class="note-text">'+esc(freeWrite)+'</p>'+
+      '<button class="btn ghost note-goto" onclick="gotoPrep()">'+esc(t.gotoPrep)+' →</button>'+
+    '</div>';
+  }
   noted.forEach(p=>{
     const n = state.notes[p.obs], d = p[L];
     h += '<div class="note-entry" id="note-'+p.obs+'">'+
@@ -1623,6 +1647,12 @@ function buildNotesText(L){
   const dstr = new Date().toISOString().slice(0,10);
   lines.push((L==='de'?'Exportiert: ':'Exported: ')+dstr);
   lines.push('');
+  const fw = (state.freeWrite || '').trim();
+  if(fw){
+    lines.push(NOTES[L].freeWrite + ':');
+    lines.push(fw);
+    lines.push('');
+  }
   PAINTINGS.forEach(p=>{
     const n = state.notes[p.obs];
     if(!n || !((n.before&&n.before.trim())||(n.after&&n.after.trim()))) return;
@@ -1643,6 +1673,7 @@ function setSection(s){ state.section = s; state.menuOpen = false; render(); }
 function toggleMenu(e){ if(e) e.stopPropagation(); state.menuOpen = !state.menuOpen; renderNav(); }
 function closeMenu(){ state.menuOpen = false; renderNav(); }
 function setTab(t){ state.prepareTab = t; render(); }
+function gotoPrep(){ state.section = 'prepare'; state.prepareTab = 'note'; state.menuOpen = false; render(); window.scrollTo({top:0}); }
 function toggleCard(id){ state.accordion[id] = !state.accordion[id]; render(); }
 function revealTimeline(){ state.timelineRevealed = true; render(); }
 function revealThread(n){ state.threadRevealed[n] = true; render(); }
@@ -1704,6 +1735,7 @@ document.getElementById('content').addEventListener('input', e=>{
   else if(bind==='thread'){ state.threads[el.getAttribute('data-key')] = el.value; }
   else if(bind==='freewrite'){
     state.freeWrite = el.value;
+    saveFreeWrite();
     const c = document.getElementById('charnum');
     if(c) c.textContent = el.value.length;
   }
