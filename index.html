@@ -686,10 +686,10 @@
     border:none;
     color:rgba(246,240,228,.6);
     font-family:var(--sans);
-    font-size:9.5px;
+    font-size:10px;
     font-weight:600;
-    letter-spacing:.2px;
-    padding:9px 1px 8px 1px;
+    letter-spacing:.3px;
+    padding:9px 2px 8px 2px;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -704,6 +704,69 @@
   }
   nav button svg{display:block;}
   nav button.active{color:var(--ochre);}
+
+  /* ---------- "More" popover ---------- */
+  .menu-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:25;
+    background:transparent;
+  }
+  .menu-anchor{
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:480px;
+    bottom:0;
+    height:0;
+    z-index:31;
+    pointer-events:none;
+  }
+  .more-menu{
+    position:absolute;
+    right:8px;
+    bottom:calc(58px + env(safe-area-inset-bottom,0px));
+    pointer-events:auto;
+    background:var(--cream);
+    border:1px solid var(--divider);
+    border-radius:12px;
+    padding:6px;
+    min-width:172px;
+    box-shadow:0 8px 28px rgba(28,18,8,.28);
+    animation:menuPop .14s ease-out;
+  }
+  @keyframes menuPop{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .more-menu::after{
+    content:"";
+    position:absolute;
+    right:24px;
+    bottom:-7px;
+    width:13px;height:13px;
+    background:var(--cream);
+    border-right:1px solid var(--divider);
+    border-bottom:1px solid var(--divider);
+    transform:rotate(45deg);
+  }
+  .menu-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    background:transparent;
+    border:none;
+    border-radius:8px;
+    padding:11px 12px;
+    font-family:var(--sans);
+    font-size:14px;
+    font-weight:600;
+    color:var(--warm-dark);
+    cursor:pointer;
+    text-align:left;
+  }
+  .menu-item svg{width:21px;height:21px;flex-shrink:0;}
+  .menu-item:active{background:var(--parchment);}
+  .menu-item.active{color:var(--ochre);}
 </style>
 </head>
 <body>
@@ -716,6 +779,7 @@
     </div>
   </header>
   <main id="content"></main>
+  <div id="menu-layer"></div>
   <nav id="nav"></nav>
 </div>
 
@@ -735,7 +799,8 @@ const state = {
   freeWrite: '',
   proverbs: {},                        // index -> bool
   checklist: {},                       // obs letter -> bool
-  notes: {}                            // obs letter -> {before, after}  (persisted to localStorage)
+  notes: {},                           // obs letter -> {before, after}  (persisted to localStorage)
+  menuOpen: false                      // "More" nav popover open?
 };
 
 /* notes persistence (localStorage) */
@@ -764,7 +829,8 @@ function icon(name){
     eye:'<path '+s+' d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6" '+s+'/>',
     checklist:'<path '+s+' d="M9 6h11M9 12h11M9 18h11M3.5 6l1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17"/>',
     notes:'<path '+s+' d="M7 3h7l4 4v12.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5v-15A1.5 1.5 0 0 1 7 3zM14 3v4h4M9.5 12h5M9.5 15.5h5"/>',
-    info:'<circle cx="12" cy="12" r="9.2" '+s+'/><path '+s+' d="M12 11v5M12 7.6v.1"/>'
+    info:'<circle cx="12" cy="12" r="9.2" '+s+'/><path '+s+' d="M12 11v5M12 7.6v.1"/>',
+    more:'<circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/>'
   };
   return '<svg width="24" height="24" viewBox="0 0 24 24">'+paths[name]+'</svg>';
 }
@@ -776,12 +842,12 @@ const chevron = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fi
 const T = {
   de:{
     appTitle:'Bruegel im KHM',
-    nav:{background:'Hintergrund',prepare:'Vorbereitung',paintings:'Gemälde',checklist:'Checkliste',notes:'Notizen',about:'Über'},
+    nav:{background:'Hintergrund',prepare:'Vorbereitung',paintings:'Gemälde',checklist:'Checkliste',notes:'Notizen',about:'Über',more:'Mehr'},
     sectionHead:{background:'Hintergrund',prepare:'Vorbereitung',paintings:'Gemälde',checklist:'Checkliste',notes:'Notizen',about:'Über'}
   },
   en:{
     appTitle:'Bruegel at the KHM',
-    nav:{background:'Background',prepare:'Prepare',paintings:'Paintings',checklist:'Checklist',notes:'Notes',about:'About'},
+    nav:{background:'Background',prepare:'Prepare',paintings:'Paintings',checklist:'Checklist',notes:'Notes',about:'About',more:'More'},
     sectionHead:{background:'Background',prepare:'Prepare',paintings:'Paintings',checklist:'Checklist',notes:'Notes',about:'About'}
   }
 };
@@ -1270,16 +1336,36 @@ function render(){
     document.querySelector('header').offsetHeight + 'px');
 }
 
+const MENU_SECTIONS = ['notes','about'];   // sections that live under the "More" popover
 function renderNav(){
   const L = state.lang;
   const items = [
     ['background','book'],['prepare','pencil'],['paintings','eye'],
-    ['checklist','checklist'],['notes','notes'],['about','info']
+    ['checklist','checklist']
   ];
-  document.getElementById('nav').innerHTML = items.map(([key,ic])=>
+  let html = items.map(([key,ic])=>
     '<button class="'+(state.section===key?'active':'')+'" onclick="setSection(\''+key+'\')">'+
       icon(ic)+'<span>'+esc(T[L].nav[key])+'</span></button>'
   ).join('');
+  const moreActive = state.menuOpen || MENU_SECTIONS.indexOf(state.section) > -1;
+  html += '<button class="'+(moreActive?'active':'')+'" onclick="toggleMenu(event)" aria-haspopup="true">'+
+    icon('more')+'<span>'+esc(T[L].nav.more)+'</span></button>';
+  document.getElementById('nav').innerHTML = html;
+  renderMenu();
+}
+function renderMenu(){
+  const layer = document.getElementById('menu-layer');
+  if(!state.menuOpen){ layer.innerHTML = ''; return; }
+  const L = state.lang;
+  const items = [['notes','notes'],['about','info']];
+  layer.innerHTML =
+    '<div class="menu-backdrop" onclick="closeMenu()"></div>'+
+    '<div class="menu-anchor"><div class="more-menu" role="menu">'+
+      items.map(([key,ic])=>
+        '<button class="menu-item'+(state.section===key?' active':'')+'" role="menuitem" onclick="setSection(\''+key+'\')">'+
+          icon(ic)+'<span>'+esc(T[L].nav[key])+'</span></button>'
+      ).join('')+
+    '</div></div>';
 }
 
 function accCard(id,title,bodyHtml){
@@ -1553,7 +1639,9 @@ function buildNotesText(L){
    ACTIONS
    ============================================================ */
 function setLang(lang){ state.lang = lang; render(); }
-function setSection(s){ state.section = s; render(); }
+function setSection(s){ state.section = s; state.menuOpen = false; render(); }
+function toggleMenu(e){ if(e) e.stopPropagation(); state.menuOpen = !state.menuOpen; renderNav(); }
+function closeMenu(){ state.menuOpen = false; renderNav(); }
 function setTab(t){ state.prepareTab = t; render(); }
 function toggleCard(id){ state.accordion[id] = !state.accordion[id]; render(); }
 function revealTimeline(){ state.timelineRevealed = true; render(); }
