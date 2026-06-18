@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#3B2110">
+<title>Bruegel im KHM / Bruegel at the KHM</title>
+<style>
+  :root{
+    --ink:#1C1208;
+    --warm-dark:#3B2110;
+    --rust:#7A4020;
+    --ochre:#B87333;
+    --parchment:#F6F0E4;
+    --cream:#FBF8F2;
+    --divider:#D4C4A8;
+    --muted:#8A7560;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--parchment);
+    color:var(--ink);
+    font-family:var(--serif);
+    line-height:1.6;
+  }
+  #app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--cream);
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 0 40px rgba(0,0,0,0.08);
+    position:relative;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:var(--warm-dark);
+    color:var(--cream);
+    padding:14px 16px calc(14px + env(safe-area-inset-top,0)) 16px;
+    padding-top:max(14px,env(safe-area-inset-top,0));
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  header .title{
+    font-family:var(--serif);
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:.2px;
+    line-height:1.2;
+  }
+  .lang-toggle{display:flex;gap:6px;flex-shrink:0;}
+  .lang-toggle button{
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.5px;
+    padding:6px 12px;
+    border-radius:999px;
+    border:1px solid rgba(246,240,228,.4);
+    background:transparent;
+    color:var(--cream);
+    cursor:pointer;
+    transition:background .15s,color .15s;
+  }
+  .lang-toggle button.active{
+    background:var(--ochre);
+    border-color:var(--ochre);
+    color:#fff;
+  }
+
+  /* ---------- Content ---------- */
+  main{
+    flex:1;
+    padding:18px 16px 96px 16px;
+  }
+  .section-head{
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--rust);
+    margin:0 0 14px 0;
+  }
+
+  /* ---------- Accordion ---------- */
+  .card{
+    border:1px solid var(--divider);
+    border-radius:10px;
+    background:var(--cream);
+    margin-bottom:12px;
+    overflow:hidden;
+  }
+  .card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:15px 16px;
+    cursor:pointer;
+    background:var(--parchment);
+    user-select:none;
+  }
+  .card-header h2{
+    font-family:var(--serif);
+    font-size:17px;
+    font-weight:700;
+    margin:0;
+    color:var(--warm-dark);
+    line-height:1.3;
+  }
+  .card-header .chev{
+    flex-shrink:0;
+    color:var(--ochre);
+    transition:transform .2s;
+  }
+  .card.open .card-header .chev{transform:rotate(90deg);}
+  .card-body{
+    padding:0 16px;
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease,padding .3s ease;
+  }
+  .card.open .card-body{
+    padding:14px 16px 18px 16px;
+    max-height:none;
+  }
+  .card-body p{margin:0;font-size:16px;color:var(--ink);}
+
+  /* ---------- Timeline (visual) ---------- */
+  .timeline{position:relative;padding-left:4px;}
+  .timeline-row{
+    display:grid;
+    grid-template-columns:78px 1fr;
+    gap:10px;
+    position:relative;
+    padding-bottom:16px;
+  }
+  .timeline-row:last-child{padding-bottom:0;}
+  .timeline-row .yr{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:700;
+    color:var(--ochre);
+    text-align:right;
+    padding-top:1px;
+  }
+  .timeline-row .ev{
+    font-family:var(--serif);
+    font-size:15px;
+    position:relative;
+    padding-left:18px;
+    border-left:2px solid var(--divider);
+    padding-bottom:2px;
+  }
+  .timeline-row .ev::before{
+    content:"";
+    position:absolute;
+    left:-6px;top:6px;
+    width:10px;height:10px;
+    border-radius:50%;
+    background:var(--ochre);
+    box-shadow:0 0 0 3px var(--cream);
+  }
+
+  /* ---------- Four threads sub-blocks ---------- */
+  .thread{
+    border-left:3px solid var(--ochre);
+    padding:2px 0 2px 14px;
+    margin-bottom:18px;
+  }
+  .thread:last-child{margin-bottom:0;}
+  .thread .tnum{
+    font-family:var(--sans);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--ochre);
+    display:block;
+    margin-bottom:2px;
+  }
+  .thread h3{
+    font-family:var(--serif);
+    font-size:16px;
+    font-weight:700;
+    color:var(--warm-dark);
+    margin:0 0 6px 0;
+  }
+  .thread p{margin:0;font-size:15px;}
+
+  /* ---------- Prepare tabs ---------- */
+  .tabs{
+    display:flex;
+    gap:4px;
+    margin-bottom:18px;
+    border-bottom:1px solid var(--divider);
+  }
+  .tabs button{
+    flex:1;
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:600;
+    padding:10px 4px;
+    background:transparent;
+    border:none;
+    border-bottom:2px solid transparent;
+    color:var(--muted);
+    cursor:pointer;
+    line-height:1.2;
+  }
+  .tabs button.active{
+    color:var(--rust);
+    border-bottom-color:var(--ochre);
+  }
+  .intro{
+    font-family:var(--serif);
+    font-size:15px;
+    font-style:italic;
+    color:var(--rust);
+    margin:0 0 18px 0;
+  }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.5px;
+    color:var(--warm-dark);
+    margin-bottom:5px;
+  }
+  .field .yr-label{
+    color:var(--ochre);
+    font-size:13px;
+    font-weight:700;
+  }
+  input[type=text],textarea{
+    width:100%;
+    font-family:var(--serif);
+    font-size:16px;
+    color:var(--ink);
+    background:var(--cream);
+    border:1px solid var(--divider);
+    border-radius:8px;
+    padding:10px 12px;
+    resize:vertical;
+  }
+  input[type=text]:focus,textarea:focus{
+    outline:none;
+    border-color:var(--ochre);
+    box-shadow:0 0 0 2px rgba(184,115,51,.15);
+  }
+  textarea{min-height:90px;line-height:1.5;}
+  textarea.big{min-height:200px;}
+  .answer{
+    font-family:var(--serif);
+    font-size:14px;
+    font-style:italic;
+    color:var(--ochre);
+    margin:6px 0 0 0;
+    padding-left:2px;
+  }
+  .btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:600;
+    padding:9px 16px;
+    border-radius:8px;
+    border:1px solid var(--ochre);
+    background:var(--ochre);
+    color:#fff;
+    cursor:pointer;
+  }
+  .btn.ghost{
+    background:transparent;
+    color:var(--rust);
+    border-color:var(--divider);
+    padding:6px 12px;
+    font-size:12px;
+  }
+  .btn-reveal-all{width:100%;margin-top:8px;}
+  .charcount{
+    font-family:var(--sans);
+    font-size:12px;
+    color:var(--muted);
+    text-align:right;
+    margin-top:6px;
+  }
+
+  /* ---------- Proverb checklist ---------- */
+  .check-row{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid var(--divider);
+  }
+  .check-row:last-child{border-bottom:none;}
+  .check-row input[type=checkbox]{
+    width:22px;height:22px;
+    flex-shrink:0;
+    margin-top:1px;
+    accent-color:var(--ochre);
+    cursor:pointer;
+  }
+  .check-row label{
+    font-family:var(--serif);
+    font-size:15px;
+    line-height:1.45;
+    cursor:pointer;
+  }
+  .check-row.checked label{
+    color:var(--muted);
+    text-decoration:line-through;
+  }
+
+  .stub{
+    font-family:var(--serif);
+    font-size:16px;
+    color:var(--muted);
+    font-style:italic;
+    text-align:center;
+    padding:40px 10px;
+  }
+  .about p{font-size:16px;margin:0 0 14px 0;}
+  .about p:last-child{margin-bottom:0;}
+
+  /* ---------- Paintings sub-nav ---------- */
+  .subnav{
+    position:sticky;
+    top:var(--header-h,52px);
+    z-index:15;
+    background:var(--cream);
+    margin:0 -16px 14px -16px;
+    padding:8px 0;
+    border-bottom:1px solid var(--divider);
+  }
+  .subnav-inner{
+    display:flex;
+    gap:7px;
+    overflow-x:auto;
+    padding:0 16px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .subnav-inner::-webkit-scrollbar{display:none;}
+  .pill{
+    flex:0 0 auto;
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:700;
+    width:30px;height:30px;
+    border-radius:50%;
+    border:1px solid var(--divider);
+    background:var(--parchment);
+    color:var(--rust);
+    cursor:pointer;
+  }
+  .group-divider{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--warm-dark);
+    margin:24px 0 12px 0;
+    padding-bottom:6px;
+    border-bottom:2px solid var(--ochre);
+  }
+
+  /* ---------- Painting cards ---------- */
+  .pcard .card-header.pheader{background:var(--warm-dark);align-items:flex-start;}
+  .pheader .obs{
+    font-family:var(--sans);
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--ochre);
+    display:block;
+  }
+  .pheader h2{color:var(--cream);font-size:16px;margin:3px 0 2px 0;}
+  .pheader .pyear{
+    font-family:var(--sans);
+    font-size:12px;
+    color:rgba(246,240,228,.65);
+  }
+  .pheader .chev{margin-top:4px;}
+  .depth{margin-bottom:14px;}
+  .depth-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .depth-label{
+    font-family:var(--sans);
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .depth-pct{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--ochre);}
+  .bar{height:6px;background:var(--parchment);border-radius:999px;overflow:hidden;}
+  .bar-fill{height:100%;background:var(--ochre);border-radius:999px;transition:width .3s;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+  .chip{
+    font-family:var(--sans);
+    font-size:11px;
+    font-weight:600;
+    padding:3px 10px;
+    border-radius:999px;
+    background:var(--parchment);
+    color:var(--rust);
+    border:1px solid var(--divider);
+  }
+  .subhead{
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    color:var(--rust);
+    margin:16px 0 8px 0;
+  }
+  ul.lookfor{list-style:none;margin:0;padding:0;}
+  ul.lookfor li{
+    position:relative;
+    padding-left:22px;
+    margin-bottom:10px;
+    font-size:15px;
+  }
+  ul.lookfor li:last-child{margin-bottom:0;}
+  ul.lookfor li::before{
+    content:"→";
+    position:absolute;
+    left:0;top:0;
+    color:var(--ochre);
+    font-weight:700;
+  }
+  .context{
+    background:var(--parchment);
+    border-left:3px solid var(--ochre);
+    border-radius:0 8px 8px 0;
+    padding:12px 14px;
+    margin-top:18px;
+  }
+  .context .subhead{margin-top:0;}
+  .context p{font-size:15px;margin:0;}
+  .obsreminder{
+    display:inline-block;
+    font-family:var(--sans);
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.5px;
+    color:var(--cream);
+    background:var(--warm-dark);
+    border-radius:6px;
+    padding:5px 10px;
+    margin-top:16px;
+  }
+
+  /* ---------- Checklist ---------- */
+  .cl-group{
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--warm-dark);
+    margin:22px 0 4px 0;
+    padding-bottom:5px;
+    border-bottom:2px solid var(--ochre);
+  }
+  .cl-row{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid var(--divider);
+  }
+  .cl-row input[type=checkbox]{
+    width:22px;height:22px;
+    flex-shrink:0;margin-top:1px;
+    accent-color:var(--ochre);
+    cursor:pointer;
+  }
+  .cl-row label{
+    flex:1;
+    font-family:var(--serif);
+    font-size:15px;
+    line-height:1.4;
+    cursor:pointer;
+  }
+  .cl-row .cl-obs{
+    flex-shrink:0;
+    font-family:var(--sans);
+    font-size:11px;
+    font-weight:600;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .cl-row.checked label{color:var(--muted);text-decoration:line-through;}
+  .cl-progress{margin-top:24px;}
+  .cl-count{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--rust);}
+  .cl-progress .bar{height:8px;margin-top:8px;}
+  .cl-congrats{
+    font-family:var(--serif);
+    font-style:italic;
+    color:var(--ochre);
+    text-align:center;
+    font-size:16px;
+    margin:16px 0 0 0;
+  }
+
+  /* ---------- About card ---------- */
+  .about-card{
+    background:var(--parchment);
+    border:1px solid var(--divider);
+    border-radius:10px;
+    padding:18px;
+  }
+  .about-card a{color:var(--rust);font-weight:600;}
+  .about-threads{list-style:none;counter-reset:t;margin:8px 0 0 0;padding:0;}
+  .about-threads li{
+    position:relative;
+    padding-left:30px;
+    margin-bottom:9px;
+    font-size:15px;
+  }
+  .about-threads li:last-child{margin-bottom:0;}
+  .about-threads li::before{
+    counter-increment:t;
+    content:counter(t);
+    position:absolute;
+    left:0;top:1px;
+    width:20px;height:20px;
+    background:var(--ochre);
+    color:#fff;
+    border-radius:50%;
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* ---------- Bottom nav ---------- */
+  nav{
+    position:sticky;
+    bottom:0;
+    z-index:20;
+    background:var(--warm-dark);
+    display:flex;
+    padding-bottom:env(safe-area-inset-bottom,0);
+  }
+  nav button{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:rgba(246,240,228,.6);
+    font-family:var(--sans);
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:.3px;
+    padding:9px 2px 8px 2px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    cursor:pointer;
+  }
+  nav button svg{display:block;}
+  nav button.active{color:var(--ochre);}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="title" id="app-title"></div>
+    <div class="lang-toggle">
+      <button id="lang-de" onclick="setLang('de')">DE</button>
+      <button id="lang-en" onclick="setLang('en')">EN</button>
+    </div>
+  </header>
+  <main id="content"></main>
+  <nav id="nav"></nav>
+</div>
+
+<script>
+/* ============================================================
+   STATE  (in-memory only, no localStorage)
+   ============================================================ */
+const state = {
+  lang: 'de',
+  section: 'background',
+  prepareTab: 'timeline',
+  accordion: {},                       // cardId -> bool
+  timeline: {},                        // year -> user text
+  timelineRevealed: false,
+  threads: {1:'',2:'',3:'',4:''},      // thread n -> user text
+  threadRevealed: {},                  // n -> bool
+  freeWrite: '',
+  proverbs: {},                        // index -> bool
+  checklist: {}                        // obs letter -> bool
+};
+
+/* ============================================================
+   ICONS
+   ============================================================ */
+function icon(name){
+  const s = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  const paths = {
+    book:'<path '+s+' d="M4 5a2 2 0 0 1 2-2h11v15H6a2 2 0 0 0-2 2zM17 3v15M4 19a2 2 0 0 0 2 2h11"/>',
+    pencil:'<path '+s+' d="M4 16.5 15 5.5l3.5 3.5L7.5 20H4zM13 7.5l3.5 3.5"/>',
+    eye:'<path '+s+' d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6" '+s+'/>',
+    checklist:'<path '+s+' d="M9 6h11M9 12h11M9 18h11M3.5 6l1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17"/>',
+    info:'<circle cx="12" cy="12" r="9.2" '+s+'/><path '+s+' d="M12 11v5M12 7.6v.1"/>'
+  };
+  return '<svg width="24" height="24" viewBox="0 0 24 24">'+paths[name]+'</svg>';
+}
+const chevron = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+const T = {
+  de:{
+    appTitle:'Bruegel im KHM',
+    nav:{background:'Hintergrund',prepare:'Vorbereitung',paintings:'Gemälde',checklist:'Checkliste',about:'Über'},
+    sectionHead:{background:'Hintergrund',prepare:'Vorbereitung',paintings:'Gemälde',checklist:'Checkliste',about:'Über'}
+  },
+  en:{
+    appTitle:'Bruegel at the KHM',
+    nav:{background:'Background',prepare:'Prepare',paintings:'Paintings',checklist:'Checklist',about:'About'},
+    sectionHead:{background:'Background',prepare:'Prepare',paintings:'Paintings',checklist:'Checklist',about:'About'}
+  }
+};
+
+/* ---- Timeline data ---- */
+const TIMELINE = {
+  de:[
+    {year:'c.1525–30', event:'Geburt in der Nähe von Breda, Brabant'},
+    {year:'c.1545', event:'Ausbildung in Antwerpen bei Pieter Coecke van Aelst'},
+    {year:'1551', event:'Als Meistermaler in der Antwerpener Gilde eingetragen'},
+    {year:'1552–53', event:'Reise nach Italien; Alpenlandschaften prägen ihn für immer'},
+    {year:'1555–63', event:'Arbeit in Antwerpen; Entwürfe für Kupferstecher'},
+    {year:'1559', event:'Lässt das h weg: Brueghel wird zu Bruegel'},
+    {year:'1563', event:'Umzug nach Brüssel; Heirat mit Mayken Coecke'},
+    {year:'1563–69', event:'Bedeutendste Gemälde — alle KHM-Meisterwerke aus dieser Zeit'},
+    {year:'1566', event:'Bildersturm fegt durch Flandern; Kirchen werden geplündert'},
+    {year:'1567', event:'Herzog von Alba kommt mit spanischen Truppen; Terror beginnt'},
+    {year:'1569', event:'Stirbt im September in Brüssel'}
+  ],
+  en:[
+    {year:'c.1525–30', event:'Born near Breda, Brabant'},
+    {year:'c.1545', event:'Trained in Antwerp under Pieter Coecke van Aelst'},
+    {year:'1551', event:'Registered as a master painter in the Antwerp guild'},
+    {year:'1552–53', event:'Travels to Italy; Alpine landscapes mark him forever'},
+    {year:'1555–63', event:'Works in Antwerp; designs for engravers'},
+    {year:'1559', event:'Drops the h: Brueghel becomes Bruegel'},
+    {year:'1563', event:'Moves to Brussels; marries Mayken Coecke'},
+    {year:'1563–69', event:'Greatest paintings — all the KHM masterpieces from this period'},
+    {year:'1566', event:'Iconoclasm sweeps through Flanders; churches are plundered'},
+    {year:'1567', event:'Duke of Alba arrives with Spanish troops; the terror begins'},
+    {year:'1569', event:'Dies in September in Brussels'}
+  ]
+};
+
+/* ---- Four threads ---- */
+const THREADS = {
+  de:[
+    {n:1,title:'Die Menge als Protagonist',body:'Bruegels Gemälde haben keine Helden. Die Menge gehört allen gleich — und diese Gleichheit ist der Punkt. Schau, wie viele Menschen gleichzeitig wie viele verschiedene Dinge tun, jeder in seine eigene Welt versunken. Frage in jedem Gemälde: Worum geht es hier? Die Antwort ist immer: allen — und niemandem.'},
+    {n:2,title:'Landschaft als Gefühlszustand',body:'Bruegels Landschaften sind keine Hintergründe. Sie sind Argumente. Das gefrorene Grau der Jäger im Schnee ist nicht nur Winter — es ist Gewicht, Ausdauer, die Kleinheit menschlicher Anstrengung gegenüber der Kälte. Achte auf Jahreszeit, Himmel, Licht und Tiefe, bevor du auf die Figuren schaust. Die Landschaft sagt dir, wie du dich fühlen sollst.'},
+    {n:3,title:'Was im Hintergrund immer passiert',body:'Trainiere dich, über das offensichtliche Zentrum jedes Gemäldes hinaus zu schauen — das Wichtigste ist oft am Rand oder in der Ferne. Die Welt hält nicht an für Wunder, Katastrophen oder den Untergang von Imperien. Das Leben geht an den Rändern weiter. Schau zuerst dorthin.'},
+    {n:4,title:'Wo ist Gott?',body:'In Bruegels Welt wird das Heilige nie angekündigt. Es versteckt sich. Die Bekehrung des Paulus ist in einem Bergpass vergraben, kaum sichtbar. Frage in jedem Gemälde: Wo wäre das Wunderbare, wenn es anwesend wäre? Dann suche es an dem Ort, den du am wenigsten erwartet hättest. Nicht abwesender Glaube — verborgener Glaube.'}
+  ],
+  en:[
+    {n:1,title:'The Crowd as Protagonist',body:"Bruegel's paintings have no heroes. The painting belongs to everyone equally — and that equality is the point. Look at how many people are doing how many different things simultaneously, each absorbed in their own world. Ask in every painting: who is this about? The answer is always everyone — and no one."},
+    {n:2,title:'Landscape as Emotional State',body:"Bruegel's landscapes are not backdrops. They are arguments. The frozen grey of Hunters in the Snow is not just winter — it is weight, endurance, the smallness of human effort against the cold. Pay attention to season, sky, light, and distance before you look at figures. The landscape tells you how to feel."},
+    {n:3,title:'What Is Always Happening in the Background',body:'Train yourself to look past the obvious centre of each painting — the most important thing is often at the edge or in the distance. The world does not pause for miracles, disasters, or the fall of empires. Life continues at the margins regardless. Look there first.'},
+    {n:4,title:'Where Is God?',body:'In Bruegel’s world, the sacred is never announced. It hides. The Conversion of Saint Paul is buried in a mountain pass, barely visible. Ask in every painting: where would the miraculous be, if it were present? Then look for it in the place you least expected. Not absent faith — hidden faith.'}
+  ]
+};
+
+/* ---- Simple accordion cards (1,3,4,5,6,7) ---- */
+const CARDS = {
+  de:{
+    c1:{title:'Wer war Bruegel?',body:'Um 1525–30 bei Breda geboren, ist Pieter Bruegel der Ältere der bedeutendste flämische Maler des 16. Jahrhunderts. Er starb 1569 in Brüssel, im Alter von etwa 44 Jahren. Er lernte in Antwerpen, reiste nach Italien, kehrte aber heim und malte Bauern — nicht aus Naivität, sondern aus bewusster Wahl. Er verkehrte in humanistischen Intellektuellenkreisen und nutzte die bäuerliche Welt als Linse auf die menschliche Kondition.'},
+    c2title:'Zeitleiste',
+    c3:{title:'Warum er wichtig ist',body:'Bruegel erfand etwas Neues: die Landschaft als Welt ohne Mittelpunkt und die Menge als Protagonisten. Vor ihm hatten Gemälde Helden. Bruegel löste diese Hierarchie auf — alle sind gleich, klein vor der Landschaft, in ihre eigene Welt versunken. Das Wunderbare, wenn es erscheint, ist im Hintergrund vergraben. Man muss es finden. Das ist eine tiefgründige und mitfühlende Vision: Das Leben geht weiter, die Geschichte geschieht am Rand unserer Aufmerksamkeit, das Heilige und das Gewöhnliche teilen dieselbe Straße.'},
+    c4:{title:'Flandern unter habsburgischer Herrschaft',body:'Bruegel lebte in den habsburgischen Niederlanden, regiert von Spanien. Karl V. dankte 1555 ab; sein Sohn Philipp II. erbte die Niederlande — ein streng katholischer Herrscher über eine Bevölkerung, die sich dem Protestantismus zuneigte. 1569 war der Herzog von Alba mit spanischen Truppen eingetroffen. Tausende wurden hingerichtet. Der Konflikt wurde zum Achtzigjährigen Krieg. Bruegel kodierte all das in seine Werke.'},
+    c5:{title:'Die Reformation und ihr Schatten',body:'Luther schlug seine Thesen 1517 an. In den Niederlanden war Katholizismus gegen Protestantismus keine abstrakte Theologie — es war eine Frage des Überlebens. Der Bildersturm fegte 1566 durch Flandern, ein Jahr bevor die Bauernhochzeit gemalt wurde. Kirchen wurden geplündert. Dieser Kontext ist entscheidend für das Verständnis, warum seine religiösen Gemälde so aussehen, wie sie aussehen.'},
+    c6:{title:'Bauern, Sprichwörter und Moralphilosophie',body:'Der Bauer war im Denken des 16. Jahrhunderts ein symbolischer Spiegel. Humanistische Denker wie Erasmus nutzten den gemeinen Menschen, um die Torheit aller Menschen aufzudecken. Sprichwörter waren verdichtete Moralphilosophie. Bruegel illustrierte über 100 davon in einem einzigen Gemälde. Das war nicht dekorativ — es war zugänglich gemachte Philosophie.'},
+    c7:{title:'Die Rolle von Verkleidung und Allegorie',body:'Um gefährliche Dinge in gefährlichen Zeiten zu sagen, verkleidet man sie. Der Kindermord zu Bethlehem wirkt biblisch, aber jedes Detail sagt: habsburgische Niederlande 1566 — zeitgenössische Rüstung, flämisches Dorf, der Befehlshaber als Herzog von Alba identifiziert. Man konnte nur die Bibelgeschichte sehen — oder das, was gerade um einen herum geschah. Beide Lesarten waren gleichzeitig verfügbar. Diese Doppelvision ist eines der ausgefeiltesten Dinge in der Kunst des 16. Jahrhunderts.'},
+    c8title:'Die vier Fäden'
+  },
+  en:{
+    c1:{title:'Who Was Bruegel?',body:'Born around 1525–30 near Breda, Pieter Bruegel the Elder is the greatest Flemish painter of the 16th century. He died in Brussels in 1569, aged perhaps 44. He trained in Antwerp, travelled to Italy, but came home and painted peasants — not out of naivety but by sophisticated choice. He moved in humanist intellectual circles and used the peasant world as a lens on the human condition.'},
+    c2title:'Timeline',
+    c3:{title:'Why He Matters',body:'Bruegel invented the landscape as a world with no centre and the crowd as protagonist. Before him, paintings had heroes. Bruegel dissolved that hierarchy — everyone is equal, small against the landscape, absorbed in their own concerns. The miraculous is buried in the background. You have to find it. This is a profound and compassionate vision: life goes on regardless, history happens at the edges of our attention, the sacred and the ordinary share the same street.'},
+    c4:{title:'Flanders Under Habsburg Rule',body:"Bruegel lived in the Habsburg Netherlands, ruled from Spain. Charles V abdicated in 1555; his son Philip II inherited it — a rigid Catholic ruler over a population drawn to Protestant ideas. By 1569 the Duke of Alba had arrived with Spanish troops. Thousands were executed. The conflict became the Eighty Years' War. Bruegel encoded all of this in his work."},
+    c5:{title:'The Reformation and Its Shadow',body:'Luther posted his theses in 1517. In the Netherlands, Catholic versus Protestant was not abstract theology — it was survival. Iconoclasm swept Flanders in 1566, the year before The Peasant Wedding was painted. Churches were stripped bare. This context is essential for understanding why his religious paintings look the way they do.'},
+    c6:{title:'Peasants, Proverbs, and Moral Philosophy',body:'The peasant was a symbolic mirror in 16th-century thought. Humanist thinkers like Erasmus used the common person to expose the foolishness of all humanity. Proverbs were compressed moral philosophy. Bruegel illustrated over 100 of them in a single painting. This was not decorative — it was philosophy made accessible.'},
+    c7:{title:'The Role of Disguise and Allegory',body:'To say dangerous things in dangerous times, you disguise them. The Massacre of the Innocents appears biblical but every detail says Habsburg Netherlands 1566 — contemporary armour, Flemish village, the commander identified as the Duke of Alba. You could see only the Bible story, or you could see what was happening around you. Both readings were simultaneously available. This double vision is one of the most sophisticated things in 16th-century art.'},
+    c8title:'The Four Threads'
+  }
+};
+
+/* ---- Prepare intros / labels ---- */
+const PREP = {
+  de:{
+    tabs:{timeline:'Test',threads:'Fäden',note:'Notiz',proverbs:'Sprichwörter'},
+    tlIntro:'Schreibe aus dem Gedächtnis, was in jedem Jahr geschah. Dann aufdecken.',
+    revealAll:'Alles aufdecken',
+    thIntro:'Schreibe jeden Faden in deinen eigenen Worten — nicht abschreiben, aus dem Gedächtnis paraphrasieren.',
+    threadLabel:'Faden',
+    reveal:'Aufdecken',
+    noteLabel:'Was weißt du bereits über Bruegel, oder was fühlst du? Schreibe frei — du wirst das nach dem Besuch wieder lesen.',
+    chars:'Zeichen',
+    pvTitle:'Niederländische Sprichwörter — Suchliste',
+    pvIntro:'Finde jedes Sprichwort im Gemälde, bevor du das Etikett liest. Abhaken, wenn gefunden.'
+  },
+  en:{
+    tabs:{timeline:'Test',threads:'Threads',note:'Note',proverbs:'Proverbs'},
+    tlIntro:'Write from memory what happened in each year. Then reveal.',
+    revealAll:'Reveal All',
+    thIntro:'Write each thread in your own words — do not copy, paraphrase from memory.',
+    threadLabel:'Thread',
+    reveal:'Reveal',
+    noteLabel:'What do you already know or feel about Bruegel? Write freely — you will reread this after your visit.',
+    chars:'characters',
+    pvTitle:'Netherlandish Proverbs — Hunt List',
+    pvIntro:'Find each proverb illustrated in the painting before reading the label. Check off as you find them.'
+  }
+};
+
+const TEST_YEARS = ['c.1525–30','c.1545','1551','1552–53','1555–63','1559','1563','1563–69','1566','1567','1569'];
+function answerForYear(year,lang){
+  const m = TIMELINE[lang].find(r=>r.year===year);
+  return m?m.event:'';
+}
+
+const PROVERBS = {
+  de:[
+    'Jemand, der den Kopf gegen eine Wand schlägt',
+    'Ein Mann füllt einen Brunnen, nachdem das Kalb schon ertrunken ist',
+    'Jemand trägt Tageslicht in einem Korb',
+    'Schweine tragen Kronen',
+    'Eine Person versucht, ein Schwein zu scheren',
+    'Die Welt auf dem Kopf — den Globus betrachten, in welche Richtung zeigt das Kreuz?',
+    'Jemand hängt einer Katze eine Glocke um',
+    'Ein bis an die Zähne bewaffneter Mann, der einen Hering isst'
+  ],
+  en:[
+    'Someone banging their head against a wall',
+    'A man filling a well after the calf has already drowned',
+    'Someone carrying daylight in a basket',
+    'Pigs wearing crowns',
+    'A person trying to shear a pig',
+    'The world turned upside down — look at the globe, which way does the cross point?',
+    "Someone hanging a bell on a cat's neck",
+    'A man armed to the teeth eating a herring'
+  ]
+};
+
+/* ---- Section 3 / 4 shared labels ---- */
+const UI = {
+  de:{depthLabel:'Dieser Guide deckt ab',lookForHead:'Worauf achten',contextHead:'Kontext'},
+  en:{depthLabel:'This guide covers',lookForHead:'What to look for',contextHead:'Context'}
+};
+const THREAD_CHIP = {
+  de:{landscape:'Landschaft',crowd:'Menge',background:'Hintergrund',god:'Gott'},
+  en:{landscape:'Landscape',crowd:'Crowd',background:'Background',god:'God'}
+};
+const GROUP_HEADERS = {
+  de:['Die Monatsserie — 1565','Große allegorische Werke','Biblische Themen','Bäuerliches Leben'],
+  en:['The Months Series — 1565','Large Allegorical Works','Biblical Subjects','Peasant Life']
+};
+
+/* ---- Paintings data (Section 3) ---- */
+const PAINTINGS = [
+  {obs:'A',group:0,year:'1565',depth:45,threads:['landscape','crowd','background'],
+    de:{title:'Jäger im Schnee (Winter)',
+      whatis:'Das berühmteste Gemälde des KHM. Drei Jäger kehren von einer mageren Jagd zurück — ein einziger Fuchs zwischen ihnen — gefolgt von erschöpften Hunden. Das Dorf breitet sich in ein zugefrorenes Tal aus. Schlittschuhläufer auf dem Eis. Krähen in kahlen Bäumen. Die Welt ist vollkommen still.',
+      lookfor:[
+        'Zuerst weit zurücktreten. Die Diagonale des Hügels zieht den Blick bis zu den Bergen — ihr ganz folgen.',
+        'Die Jäger triumphieren nicht. Auf ihre Körperhaltung achten, auf die Köpfe der Hunde. Das ist Niederlage in der Kälte.',
+        'Die Schlittschuhläufer zählen. Jeder ist winzig, in sich versunken. Niemand bemerkt die heimkehrenden Jäger.',
+        'Die Vogelfallen auf dem Eis suchen — kleine Kreuze, die die kahlen Bäume darüber spiegeln.',
+        'Den Himmel betrachten. Er ist nicht dramatisch. Er ist einfach da. Diese Flachheit ist der emotionale Schlüssel.',
+        'Links brennt ein Feuer vor einem Gasthaus. Was tun sie dort?'],
+      context:'Dies war eine von sechs Tafeln, die die Monate des Jahres darstellen sollten. Februar war stets der Monat der kalten Ausdauer. Bruegel verwandelt eine dekorative Konvention in eine Meditation über die Kleinheit des Menschen gegenüber der Natur. Die Berge sind die Alpen, die er 1552 überquerte — sie blieben ihm für immer.'},
+    en:{title:'Hunters in the Snow',
+      whatis:'The most famous painting in the KHM. Three hunters return from a poor hunt — one fox between them — followed by exhausted dogs. The village spreads into a frozen valley. Skaters on the ice. Crows in bare trees. The world is utterly still.',
+      lookfor:[
+        'Stand far back first. The diagonal of the hill pulls your eye to the mountains — follow it all the way.',
+        "The hunters are not triumphant. Look at their posture, the dogs' heads. This is defeat in the cold.",
+        'Count the skaters. Each is tiny, absorbed. No one notices the hunters returning.',
+        'Find the bird traps on the ice — small crosses echoing the bare trees above.',
+        'Look at the sky. It is not dramatic. It just is. That flatness is the emotional key.',
+        'A fire burns outside an inn on the left. What are they doing there?'],
+      context:'One of six panels representing the months of the year. February was always the month of cold endurance. Bruegel transforms a decorative convention into a meditation on human smallness against nature. The mountains are the Alps he crossed in 1552 — they stayed with him forever.'}},
+
+  {obs:'B',group:0,year:'1565',depth:40,threads:['landscape','background'],
+    de:{title:'Der düstere Tag (Frühling)',
+      whatis:'Die am meisten übersehene Monatstafel und wohl die emotional komplexeste. Der Himmel ist zinnfarben. Bäume noch kahl. Ein Mann beschneidet Weiden. Ein Kind trägt eine Faschingskrone aus Papier — Faschingszeit, aber die Stimmung ist nicht festlich. In der Ferne peitscht ein Sturm über ein Meer.',
+      lookfor:[
+        'Das Kind mit Papierkrone und Waffel — letzte Faschingsgeste vor der Fastenzeit. Kontrast zwischen häuslicher Wärme und stürmischer Ferne beachten.',
+        'Das Meer im Hintergrund. Schiffe kämpfen. Niemand im Vordergrund bemerkt es.',
+        'Die gestutzten Weiden — brutal zurückgeschnitten — symbolisieren Ausdauer und Erneuerung.',
+        'Die Figur auf dem Dach beim Reparieren des Strohdachs. Das Leben geht weiter.'],
+      context:'Wahrscheinlich Februar oder Anfang März — das Scharnier zwischen Winter und Frühling. Bruegel erfasst das psychologische Gewicht dieses Schwellenmomentes: noch nicht ganz Winter, noch nicht Frühling, das Licht falsch, die Stimmung ungelöst.'},
+    en:{title:'The Gloomy Day',
+      whatis:'The most overlooked Months panel and arguably the most emotionally complex. Sky bruised pewter. Trees still bare. A man prunes willows. A child wears a paper carnival crown — Carnival season, but the mood is not festive. In the distance a storm lashes a sea.',
+      lookfor:[
+        'The child with paper crown and waffle — last gesture of Carnival before Lent. Note the contrast between small domestic warmth and the stormy distance.',
+        'Look at the sea in the background. Ships struggling. No one in the foreground notices.',
+        'The pollarded willows — brutally cut back — symbolise endurance and renewal.',
+        "The figure on the roof repairing thatch. Life's maintenance continues regardless."],
+      context:'Likely February or early March — the hinge between winter and first signs of spring. Bruegel captures the psychological weight of this liminal moment: not quite winter, not yet spring, the light wrong, the mood unresolved.'}},
+
+  {obs:'C',group:0,year:'1565',depth:40,threads:['crowd','landscape'],
+    de:{title:'Die Heuernte',
+      whatis:'Hochsommer. Felder voller Leben und Arbeit. Frauen tragen riesige Rechen und Körbe auf dem Kopf. Männer mähen. Die Landschaft leuchtet grün und golden. Die körperlich freudigste der Monatstafeln — Körper in Bewegung, die Erde üppig.',
+      lookfor:[
+        'Die Frauen im Vordergrund — aufrechter Rücken, lastentragend, zielstrebig. Keine dekorativen Bauern, sondern arbeitende Körper.',
+        'Die Straße, die sich ins Dorf in der Mitte windet. Ihr folgen — Bruegel führt den Blick in Schichten durch die Landschaft.',
+        'Menschen suchen, die im Schatten essen und rasten. Selbst im Überfluss ist Ruhe notwendig.',
+        'Die Farbpalette ist die wärmste aller Tafeln. Wirken lassen, bevor man analysiert.'],
+      context:'Die Monatsserie stellt saisonale Arbeit als moralisch tugendhaft dar. Aber Bruegel erhebt die Tradition: Seine Arbeiter haben Würde und körperliche Präsenz. Es sind keine Illustrationen von Arbeit. Es sind Menschen, die arbeiten.'},
+    en:{title:'Haymaking',
+      whatis:'High summer. Fields alive with labour. Women carry enormous rakes and baskets on their heads. Men scythe. The landscape glows green and gold. The most physically joyful of the Months panels — bodies in motion, the earth abundant.',
+      lookfor:[
+        'The women in the foreground — straight-backed, load-bearing, purposeful. Not decorative peasants but working bodies.',
+        'The road curves into the village in the middle distance. Follow it — Bruegel pulls you through the landscape in layers.',
+        'Find people eating and resting in the shade. Even in abundance, rest is necessary.',
+        'The colour palette is the warmest of all panels. Let it land before you analyse.'],
+      context:'The Months series depicts seasonal labour as morally virtuous. But Bruegel elevates the tradition: his workers have dignity and physical presence. They are not illustrations of labour. They are people working.'}},
+
+  {obs:'D',group:0,year:'1565',depth:40,threads:['landscape','crowd'],
+    de:{title:'Heimkehr der Herde (Herbst)',
+      whatis:'Vieh wird von den Hochalmen getrieben, da der Winter naht. Bäume haben sich gefärbt. Himmel schwer. Dieselbe diagonale Komposition wie die Jäger im Schnee — aber bernsteinfarben statt grau. Die letzte Wärme vor Rückkehr der Kälte.',
+      lookfor:[
+        'Direkt mit den Jägern im Schnee vergleichen. Gleicher Blickwinkel, gleiche Diagonale. Was fühlt sich anders an, und warum?',
+        'Das Vieh, das sich als Masse bewegt — einzelne Tiere, kollektive Bewegung. Der Mengen-Faden auf Tiere angewendet.',
+        'Die kahle Felswand rechts. Die Natur wird härter, karger.',
+        'Den Himmel: Der Farbübergang von warm zu kalt geschieht innerhalb des Gemäldes selbst.'],
+      context:'Jäger und Heimkehr der Herde bilden ein gematchtes Paar — dieselbe Landschaft in Winter und Herbst. Bruegel verstand den Jahresrhythmus als emotionalen Zyklus. Der Almabtrieb war ein bedeutendes Ereignis im bäuerlichen Kalender.'},
+    en:{title:'The Return of the Herd',
+      whatis:'Cattle driven down from the high pastures as winter approaches. Trees have turned. Sky is heavy. Same diagonal composition as Hunters in the Snow — but amber rather than grey. The last warmth before the cold returns.',
+      lookfor:[
+        'Compare directly to Hunters in the Snow. Same viewpoint, same diagonal. What feels different, and why?',
+        'The cattle moving as a mass — individual animals, collective movement. The crowd thread applied to animals.',
+        'The bare cliff face on the right. Nature becoming harder.',
+        'The sky: the colour transition from warm to cold happening within the painting itself.'],
+      context:'Hunters and Return of the Herd form a matched pair — the same landscape in winter and autumn. Bruegel understood seasonal rhythm as an emotional cycle. The transhumance was a major event in the agricultural calendar.'}},
+
+  {obs:'E',group:1,year:'1559',depth:20,threads:['crowd','background'],
+    de:{title:'Niederländische Sprichwörter',
+      whatis:'Über 100 niederländische Sprichwörter gleichzeitig in einer Dorfszene illustriert. Jede Figur, jede Handlung, jedes Objekt kodiert einen Spruch. Bruegel auf seinem enzyklopädischsten — ein gemaltes Wörterbuch menschlicher Torheit.',
+      lookfor:[
+        'Nicht zuerst das Etikett lesen. Die Sprichwortliste aus Abschnitt 2 verwenden und jedes selbst finden.',
+        'Den Globus über dem zentralen Gebäude betrachten. In welche Richtung zeigt das Kreuz? Nach unten — die Welt auf den Kopf gestellt.',
+        'Den Mann im blauen Mantel in der Mitte finden — er wirft Perlen vor die Säue.',
+        'Jemand trägt Tageslicht in einem Korb — nahe dem linken Rand.',
+        'Das Paar beim Kamin suchen. Sie hängt ihrem Mann wörtlich einen blauen Mantel um.'],
+      context:'Sprichwörter im 16. Jahrhundert waren verdichtete Moralphilosophie, in Predigten und Unterricht verwendet. Das Gemälde ist Wissenstest, Komödie und moralisches Argument zugleich. Im Kern: Die Welt wird von Narren regiert. Wir alle eingeschlossen.'},
+    en:{title:'Netherlandish Proverbs',
+      whatis:'Over 100 Netherlandish proverbs illustrated simultaneously in one village scene. Every figure, action, and object encodes a saying. Bruegel at his most encyclopaedic — a painted dictionary of human folly.',
+      lookfor:[
+        'Do not read the label first. Use your proverb hunt list from Section 2 and find each one yourself.',
+        'Look at the globe above the central building. Which way does the cross point? Downward — the world turned upside down.',
+        'Find the man in blue cloak near the centre — throwing roses before swine.',
+        'Someone carrying daylight in a basket — near the left edge.',
+        'Find the couple near the fireplace — she is literally hanging a blue cloak on her husband.'],
+      context:'Proverbs in the 16th century were compressed moral philosophy, used in sermons and teaching. The painting is a test of knowledge, a comedy, and a moral argument. At its heart: the world is run by fools. All of us included.'}},
+
+  {obs:'F',group:1,year:'1559',depth:35,threads:['crowd','background','god'],
+    de:{title:'Der Kampf zwischen Fasching und Fasten',
+      whatis:'Ein Stadtplatz, geteilt zwischen zwei Welten. Links: Gasthaus und Fasching — Überschwang, Fleisch, Musik, Masken. Rechts: Kirche und Fasten — Fasten, Fisch, Buße, Bettler. Zwei allegorische Figuren kämpfen in der Mitte. Der gesamte Platz ist Theater.',
+      lookfor:[
+        'Die dicke Faschingsfigur reitet auf einem Fass, schwingt einen Spieß mit Schweinekopf. Die dünne Fastenfigur schwingt eine Bäckerschaufel mit zwei getrockneten Fischen.',
+        'Die Kirche betrachten — die Menschen sehen nicht frömmer aus als die Feiernden.',
+        'Das Paar suchen, das von einem Narren in der Mitte geführt wird — zwischen beiden Welten, keiner angehörend.',
+        'Die Bettler bei der Kirche — die Fastenzeit ist ihre Saison der Nächstenliebe. Beachten, wer sie wahrnimmt.'],
+      context:'1559 gemalt, als die Spannung zwischen Katholiken und Protestanten gefährlich wurde. Das Gemälde ergreift keine Partei — Fasching und Fasten sind gleichermaßen menschlich, gleichermaßen absurd. Diese Ausgewogenheit in einer Zeit tödlicher religiöser Konflikte ist selbst ein politischer Akt.'},
+    en:{title:'The Fight Between Carnival and Lent',
+      whatis:'A town square split between two worlds. Left: inn and Carnival — excess, meat, music, masks. Right: church and Lent — fasting, fish, penitence, beggars. Two allegorical figures joust in the centre. The entire square is theatre.',
+      lookfor:[
+        "The fat Carnival figure rides a barrel, wielding a spit with a pig's head. The thin Lent figure brandishes a baker's peel with two dried fish.",
+        'Look at the church — people emerge but look no more pious than the revellers.',
+        'Find the couple led by a fool in the middle distance — walking between both worlds, belonging to neither.',
+        'The beggars near the church — Lent is their season of charity. Note who notices them.'],
+      context:'Painted in 1559 as Catholic/Protestant tension was becoming dangerous. The painting refuses to take sides — both Carnival and Lent are shown as equally human, equally absurd. This even-handedness in a time of lethal religious conflict is itself a political act.'}},
+
+  {obs:'G',group:1,year:'1560',depth:30,threads:['crowd','background'],
+    de:{title:'Kinderspiele',
+      whatis:'Über 200 Kinder spielen mehr als 80 verschiedene Spiele auf einem Stadtplatz. Keine Erwachsenen. Das Gemälde erstreckt sich bis zum Horizont ohne Ende. Kein Zentrum, keine Hierarchie, keine Erzählung. Nur Aktivität.',
+      lookfor:[
+        'Das Gemälde langsam von links nach rechts abgehen. Jede kleine Gruppe ist eine vollständige Welt.',
+        'So viele Spiele wie möglich identifizieren — Kreisel, Bockspringen, Stelzen, Reifen, Blindekuh.',
+        'Die Kinder spielen mit absoluter Ernsthaftigkeit. Spiele sind Arbeit.',
+        'Das Gemälde hat keinen Fluchtpunkt, an dem das Auge ruhen kann. Diese Unruhe ist beabsichtigt.',
+        'Die eine erwachsene Figur suchen — eine Frau in einer Türöffnung. Was tut sie?'],
+      context:'Gelehrte diskutieren, ob das nur eine Aufzeichnung von Spielen ist oder eine moralische Allegorie — das Erwachsenenleben ist auch nur Spielen, genauso zwecklos und repetitiv. Wir hören nie auf zu spielen. Wir wechseln nur die Spiele.'},
+    en:{title:"Children's Games",
+      whatis:'Over 200 children play more than 80 different games across a town square. No adults. The painting extends to the horizon with no end in sight. No centre, no hierarchy, no narrative. Only activity.',
+      lookfor:[
+        'Walk along the painting slowly from left to right. Each small group is a complete world.',
+        "Identify as many games as you can — spinning tops, leapfrog, stilts, hoops, blindman's bluff.",
+        'The children play with absolute seriousness. Games are work.',
+        'The painting has no vanishing point where the eye can rest. That restlessness is intentional.',
+        'Find the one adult figure — a woman at a doorway. What is she doing?'],
+      context:'Scholars debate whether this is a record of games or a moral allegory — adult life is also just games, just as purposeless and repetitive. We never stop playing. We just change the games.'}},
+
+  {obs:'H',group:2,year:'1563',depth:45,threads:['background','crowd','god'],
+    de:{title:'Der Turmbau zu Babel',
+      whatis:'Der Turm füllt die Leinwand — unmöglich groß, schon beim Bau bröckelnd. König Nimrod inspiziert die Arbeit, Steinmetze knien vor ihm. Die Stadt breitet sich bis zum Meer aus. Der Himmel ist gewaltig. Das Projekt ist zum Scheitern verurteilt.',
+      lookfor:[
+        'Der Turm orientiert sich am Kolosseum in Rom — Bruegel sah es auf seiner Italienreise. Rom als Babylon: das Reich, das zu weit gegangen ist.',
+        'Schauen, wo der Turm bereits versagt — obere Stockwerke falsch ausgerichtet, Fundamente untergraben sich.',
+        'Nimrod ist winzig gegenüber seinem eigenen Ehrgeiz. Die Steinmetze verbeugen sich, aber das Projekt vernichtet sie alle.',
+        'Den Hafen und die Schiffe unten suchen. Leben und Handel gehen normal weiter rund um die Katastrophe oben.',
+        'Kein Gott ist sichtbar. Aber die Wolken oben — sind sie natürlich, oder etwas anderes?'],
+      context:'Der Turmbau zu Babel (Genesis 11) handelt von der Bestrafung menschlichen Hochmuts. Für Bruegels Publikum resonierte das mit der habsburgischen Überdehnung, mit jeder Institution, die sich für ewig hielt. Der Turm wird immer gebaut. Er fällt immer.'},
+    en:{title:'The Tower of Babel',
+      whatis:'The tower fills the canvas — impossibly large, already crumbling as it is built. King Nimrod inspects the work, stonemasons kneeling before him. The city spreads to the sea. The sky is immense. The project is doomed.',
+      lookfor:[
+        'The tower is based on the Colosseum in Rome — Bruegel saw it on his Italian journey. Rome as Babylon: the empire that overreached.',
+        'Look at where the tower is already failing — upper stories misaligned, foundations undermining themselves.',
+        'Nimrod is tiny against his own ambition. The masons bow but the project will destroy them all.',
+        'Find the harbour and ships below. Life and trade continue normally around the catastrophe being built above.',
+        'There is no God visible. But the clouds at the top — are they natural, or something else?'],
+      context:"The Tower of Babel (Genesis 11) is about the punishment of human hubris. For Bruegel's audience, this resonated with Habsburg overreach, with any institution that believed itself eternal. The tower is always being built. It always falls."}},
+
+  {obs:'I',group:2,year:'1567',depth:50,threads:['god','background','crowd'],
+    de:{title:'Die Bekehrung des Paulus',
+      whatis:'Ein riesiges Heer bewegt sich durch einen Alpenpfad. Irgendwo in der Mitte der Menge ist ein Mann vom Pferd gefallen und liegt auf dem Boden, umgeben von Soldaten, die es kaum bemerken. Das ist Saulus von Tarsus. Seine Bekehrung zum Apostel Paulus. Man kann ihn kaum finden.',
+      lookfor:[
+        'Zuerst die gefallene Figur finden — sie ist nicht in der Mitte. In der Mitte des Bildes suchen, umgeben von Pferden und Soldaten.',
+        'Die Soldaten reagieren nicht auf ein Wunder. Sie kümmern sich um ihre Pferde und marschieren weiter.',
+        'Die Landschaft überragt alles. Das Wunder hat geologisches Ausmaß — und doch ist dem Berg gleichgültig.',
+        'Faden 4 ist hier am aktivsten: Wo ist Gott? Das Licht fällt — woher?'],
+      context:'Apostelgeschichte 9,3–4: „Als er Damaskus sich näherte, umstrahlte ihn plötzlich ein Licht vom Himmel. Er stürzte zu Boden." Bruegel nimmt diesen dramatischsten aller biblischen Momente und versteckt ihn. Gott wirkt unsichtbar, peripher, mitten im gewöhnlichen menschlichen Chaos.'},
+    en:{title:'The Conversion of Saint Paul',
+      whatis:'A vast army moves through an Alpine mountain pass. Somewhere in the crowd, a man has fallen from his horse and lies on the ground, surrounded by soldiers who barely notice. That is Saul of Tarsus. His conversion into Paul the Apostle. You almost cannot find it.',
+      lookfor:[
+        'Find the fallen figure first — he is not in the centre. Look in the middle distance, surrounded by horses and soldiers.',
+        'The soldiers around him are not reacting to a miracle. They are managing horses and continuing to march.',
+        'The landscape dwarfs everything. The miracle is geological in scale — and yet the mountain does not care.',
+        'Thread 4 is most active here: where is God? The light falls — from where?'],
+      context:'Acts 9:3–4: "As he neared Damascus, suddenly a light from heaven flashed around him. He fell to the ground." Bruegel takes this most dramatic of biblical moments and hides it. God acts invisibly, peripherally, in the middle of ordinary human chaos.'}},
+
+  {obs:'J',group:2,year:'1565–67',depth:50,threads:['crowd','god','background'],
+    de:{title:'Der Kindermord zu Bethlehem',
+      whatis:'Soldaten ziehen durch ein schneebedecktes flämisches Dorf und töten Säuglinge. Eltern flehen und weinen. Ein Befehlshaber in Schwarz beobachtet vom Pferd. Das Dorf ist unverkennbar niederländisch. Die Rüstungen sind aus dem 16. Jahrhundert. Das ist nicht das antike Bethlehem. Das ist der Terror des Herzogs von Alba, 1567.',
+      lookfor:[
+        'Den Befehlshaber in Schwarz auf dem grauen Pferd — identifiziert als Herzog von Alba. Körperhaltung betrachten: kalt, administrativ, beobachtend.',
+        'Die Rüstungen — zeitgenössische habsburgische Militäruniform. Das ist kein Kostümfilm.',
+        'Die Trauer der Eltern ist spezifisch und individuell. Bruegel verallgemeinert das Leid nicht.',
+        'Jedes architektonische Detail ist flämisch. Jedes Detail sagt: Das passiert hier, jetzt.',
+        'Wo ist Gott in diesem Gemälde? Faden 4 anwenden und mit dem Unbehagen der Antwort sitzen.'],
+      context:'Matthäus 2,16 — Herodes befiehlt die Tötung aller männlichen Säuglinge in Bethlehem. Bruegel überträgt die Geschichte auf die spanische Unterdrückung des protestantischen Aufstands. Das Gemälde war so politisch brisant, dass ein späterer Besitzer die toten Säuglinge übermalen ließ. Die KHM-Version zeigt diese Übermalung — genau hinschauen und man kann die Tilgung spüren.'},
+    en:{title:'The Massacre of the Innocents',
+      whatis:"Soldiers move through a snow-covered Flemish village, killing infants. Parents beg and weep. A commander in black watches from horseback. The village is unmistakably Netherlandish. The armour is 16th century. This is not ancient Bethlehem. This is the Duke of Alba's terror, 1567.",
+      lookfor:[
+        'The commander in black on the grey horse — identified as the Duke of Alba. Look at his posture: cold, administrative, watching.',
+        "The soldiers' armour — contemporary Habsburg military uniform. This is not a costume drama.",
+        'The grief of the parents is specific and individual. Bruegel does not generalise suffering.',
+        'Every architectural detail is Flemish. Every detail says: this is happening here, now.',
+        'Where is God in this painting? Apply Thread 4 and sit with the discomfort of the answer.'],
+      context:'Matthew 2:16 — Herod orders the killing of all male infants in Bethlehem. Bruegel transposes this onto the Spanish repression of Protestant revolt. The painting was so politically charged that a later owner had the dead infants painted over. The KHM version shows this overpainting — look carefully and you may sense the erasure.'}},
+
+  {obs:'K',group:3,year:'c.1567',depth:45,threads:['crowd','background','god'],
+    de:{title:'Bauernhochzeit',
+      whatis:'Eine Scheune voller Hochzeitsgäste — Essen, Trinken, Dudelsack. Laut, warm, voller Appetit. Aber wo ist der Bräutigam? Die Braut sitzt passiv, Hände gefaltet, mit einem Papierkranz gekrönt. Die Freude ist echt. Aber auch die Seltsamkeit.',
+      lookfor:[
+        'Die Braut finden. Sie sitzt still, Augen gesenkt, ein grünes Tuch hinter ihrem Kopf als improvisierten Thron.',
+        'Der Bräutigam ist mit ziemlicher Sicherheit abwesend — in der Bauernüberlieferung saß er während des Mahls nicht bei der Braut.',
+        'Die Schüsseln werden auf einer aus den Angeln gehobenen Tür weitergereicht. Improvisierter Überfluss.',
+        'Den Mann, der Getränke einschenkt — auf seine Konzentration achten. Er ist die fokussierteste Person im Raum.',
+        'Ein Kind im Vordergrund leckt einen Teller ab. Reiner Appetit, kein Vorgeben.',
+        'Die zwei Figuren links suchen, die nicht ganz dazugehören — besser gekleidet, beobachtend. Möglicherweise Auftraggeber und Bruegel selbst.'],
+      context:'1567 gemalt, im Jahr, als der Herzog von Alba ankam. Die Wärme dieses Gemäldes steht in direkter Spannung zum politischen Schrecken vor der Scheunentür. Bruegel wusste, was geschah. Er malte trotzdem ein Fest — als Zeugenschaft des gewöhnlichen Lebens, das gegen die Katastrophe besteht.'},
+    en:{title:'The Peasant Wedding',
+      whatis:'A barn packed with wedding guests — eating, drinking, bagpipes. Loud, warm, full of appetite. But where is the groom? The bride sits passive, hands folded, crowned with a paper wreath. The joy is real. But so is the strangeness.',
+      lookfor:[
+        'Find the bride. She sits quietly, eyes downcast, a green cloth behind her head as a makeshift throne.',
+        'The groom is almost certainly absent — in peasant tradition he did not sit with the bride during the meal.',
+        'The dishes are passed on a door taken off its hinges. Improvised abundance.',
+        'The man pouring drinks — look at his concentration. He is the most focused person in the room.',
+        'A child in the foreground licks a plate. Pure appetite, no pretence.',
+        "Find the two figures on the left who don't quite belong — better dressed, observing. Possibly the patron and Bruegel himself."],
+      context:'Painted in 1567, the year the Duke of Alba arrived. The warmth of this painting exists in direct tension with the political horror outside the barn door. Bruegel knew what was happening. He painted a feast anyway — as an act of witness to ordinary human life persisting against catastrophe.'}},
+
+  {obs:'L',group:3,year:'c.1568',depth:40,threads:['crowd','god','background'],
+    de:{title:'Bauerntanz',
+      whatis:'Ein Dorfplatz, ein Festtag, Tanzen, Trinken, Raufereien. Die Energie ist kinetisch — Figuren lehnen, ziehen, stampfen. Aber es gibt eine Kirche im Hintergrund mit einem Marienbild auf einem Pfahl, und fast niemand schaut hin. Pendant zur Bauernhochzeit — dieselbe Welt, einen Tag später.',
+      lookfor:[
+        'Das tanzende Paar im Vordergrund — der Mann zieht die Frau fast aggressiv. Energie oder Gewalt? Beides?',
+        'Der Dudelsackspieler spielt mit halb geschlossenen Augen, gleichgültig gegenüber der Menge.',
+        'Den Mann suchen, der eine Frau küsst. Den Mann suchen, der andere zum Tanz auffordert.',
+        'Das Marienbild auf dem Pfahl — das einzige sakrale Bild im Gemälde. Beachten, wie viele Menschen ihm den Rücken zuwenden.',
+        'Die Energie hier mit der Bauernhochzeit vergleichen. Dieselben Menschen — was hat sich über Nacht verändert?'],
+      context:'Tanzen an Festtagen war ein Ziel protestantischer Moralreformer. Bruegel zeigt es ohne moralisches Urteil — aber das vernachlässigte Marienbild ist ein Faden-4-Moment. Das Heilige ist anwesend. Es wird einfach ignoriert, so wie das Heilige oft ignoriert wird, wenn das Leben laut und körperlich ist.'},
+    en:{title:'The Peasant Dance',
+      whatis:'A village square, a feast day, dancing, drinking, brawling. The energy is kinetic — figures lean, pull, stomp. But there is a church in the background with a Madonna image on a post, and almost no one is looking at it. Companion to The Peasant Wedding — same world, one day later.',
+      lookfor:[
+        'The couple dancing in the foreground — the man pulls the woman almost aggressively. Energy or violence? Both?',
+        'The bagpiper plays with eyes half-closed, absorbed, indifferent to the crowd.',
+        'Find the man kissing a woman near the inn. Find the man gesturing others to the dance.',
+        'The Madonna image on the pole — the only sacred image in the painting. Note how many people face away from it.',
+        'Compare the energy here to The Peasant Wedding. Same people — what changed overnight?'],
+      context:'Dancing on feast days was a target of Protestant moral reformers. Bruegel shows it without moral judgment — but the neglected Madonna is a Thread 4 moment. The sacred is present. It is simply being ignored, the way the sacred often is when life is loud and immediate and physical.'}}
+];
+
+/* ---- Checklist labels (Section 4) ---- */
+const CL = {
+  de:{title:'Gemälde-Checkliste',intro:'Hake ab, wenn du vor dem Gemälde gestanden hast.',count:'gesehen',congrats:'Alle 12 Gemälde gesehen. Gut gemacht.'},
+  en:{title:'Paintings Checklist',intro:'Check off each painting once you have stood in front of it.',count:'seen',congrats:'All 12 paintings seen. Well done.'}
+};
+
+/* ---- About content (Section 5) ---- */
+const ABOUT = {
+  de:{
+    p:[
+      'Dieser Guide begleitet deinen Besuch der Bruegel-Sammlung im Kunsthistorischen Museum Wien, Saal X (Gemäldegalerie, 1. Etage).',
+      'Die Sammlung umfasst 12 Gemälde von Pieter Bruegel dem Älteren (um 1525/30–1569) — die größte und bedeutendste Bruegel-Sammlung der Welt.'
+    ],
+    tip:'Tipp: Besuche <a href="https://insidebruegel.net" target="_blank" rel="noopener">insidebruegel.net</a> für hochauflösende Details aller KHM-Bruegel-Gemälde.',
+    threadsTitle:'Die vier Fäden, die durch alle Gemälde führen:',
+    threads:['Die Menge als Protagonist','Landschaft als Gefühlszustand','Was im Hintergrund immer passiert','Wo ist Gott?']
+  },
+  en:{
+    p:[
+      'This guide accompanies your visit to the Bruegel collection at the Kunsthistorisches Museum Vienna, Room X (Picture Gallery, first floor).',
+      'The collection comprises 12 paintings by Pieter Bruegel the Elder (c.1525/30–1569) — the largest and most important Bruegel collection in the world.'
+    ],
+    tip:'Tip: Visit <a href="https://insidebruegel.net" target="_blank" rel="noopener">insidebruegel.net</a> for high-resolution details of all KHM Bruegel paintings.',
+    threadsTitle:'The four threads that run through every painting:',
+    threads:['The Crowd as Protagonist','Landscape as Emotional State','What Is Always Happening in the Background','Where Is God?']
+  }
+};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function esc(str){
+  return String(str).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  const L = state.lang;
+  document.documentElement.lang = L;
+  document.getElementById('app-title').textContent = T[L].appTitle;
+  document.getElementById('lang-de').classList.toggle('active', L==='de');
+  document.getElementById('lang-en').classList.toggle('active', L==='en');
+
+  renderNav();
+
+  const head = '<p class="section-head">'+esc(T[L].sectionHead[state.section])+'</p>';
+  let html = '';
+  switch(state.section){
+    case 'background': html = renderBackground(); break;
+    case 'prepare':    html = renderPrepare(); break;
+    case 'paintings':  html = renderPaintings(); break;
+    case 'checklist':  html = renderChecklist(); break;
+    case 'about':      html = renderAbout(); break;
+  }
+  document.getElementById('content').innerHTML = head + html;
+  document.documentElement.style.setProperty('--header-h',
+    document.querySelector('header').offsetHeight + 'px');
+}
+
+function renderNav(){
+  const L = state.lang;
+  const items = [
+    ['background','book'],['prepare','pencil'],['paintings','eye'],
+    ['checklist','checklist'],['about','info']
+  ];
+  document.getElementById('nav').innerHTML = items.map(([key,ic])=>
+    '<button class="'+(state.section===key?'active':'')+'" onclick="setSection(\''+key+'\')">'+
+      icon(ic)+'<span>'+esc(T[L].nav[key])+'</span></button>'
+  ).join('');
+}
+
+function accCard(id,title,bodyHtml){
+  const open = state.accordion[id];
+  return '<div class="card'+(open?' open':'')+'">'+
+    '<div class="card-header" onclick="toggleCard(\''+id+'\')">'+
+      '<h2>'+esc(title)+'</h2>'+chevron+
+    '</div>'+
+    '<div class="card-body">'+bodyHtml+'</div>'+
+  '</div>';
+}
+
+function renderBackground(){
+  const L = state.lang, c = CARDS[L];
+  let h = '';
+  h += accCard('c1', c.c1.title, '<p>'+esc(c.c1.body)+'</p>');
+
+  // Card 2 — visual timeline
+  const tl = TIMELINE[L].map(r=>
+    '<div class="timeline-row"><div class="yr">'+esc(r.year)+'</div>'+
+    '<div class="ev">'+esc(r.event)+'</div></div>'
+  ).join('');
+  h += accCard('c2', c.c2title, '<div class="timeline">'+tl+'</div>');
+
+  h += accCard('c3', c.c3.title, '<p>'+esc(c.c3.body)+'</p>');
+  h += accCard('c4', c.c4.title, '<p>'+esc(c.c4.body)+'</p>');
+  h += accCard('c5', c.c5.title, '<p>'+esc(c.c5.body)+'</p>');
+  h += accCard('c6', c.c6.title, '<p>'+esc(c.c6.body)+'</p>');
+  h += accCard('c7', c.c7.title, '<p>'+esc(c.c7.body)+'</p>');
+
+  // Card 8 — four threads
+  const tnumLabel = (L==='de'?'Faden':'Thread');
+  const blocks = THREADS[L].map(t=>
+    '<div class="thread">'+
+      '<span class="tnum">'+esc(tnumLabel)+' '+t.n+'</span>'+
+      '<h3>'+esc(t.title)+'</h3>'+
+      '<p>'+esc(t.body)+'</p>'+
+    '</div>'
+  ).join('');
+  h += accCard('c8', c.c8title, blocks);
+
+  return h;
+}
+
+function renderPrepare(){
+  const L = state.lang, p = PREP[L];
+  const tabs = ['timeline','threads','note','proverbs'];
+  let h = '<div class="tabs">'+tabs.map(t=>
+    '<button class="'+(state.prepareTab===t?'active':'')+'" onclick="setTab(\''+t+'\')">'+esc(p.tabs[t])+'</button>'
+  ).join('')+'</div>';
+
+  if(state.prepareTab==='timeline')  h += renderTimelineTest();
+  if(state.prepareTab==='threads')   h += renderThreadsTest();
+  if(state.prepareTab==='note')      h += renderNote();
+  if(state.prepareTab==='proverbs')  h += renderProverbs();
+  return h;
+}
+
+function renderTimelineTest(){
+  const L = state.lang, p = PREP[L];
+  let h = '<p class="intro">'+esc(p.tlIntro)+'</p>';
+  TEST_YEARS.forEach((yr,i)=>{
+    const val = state.timeline[yr]||'';
+    h += '<div class="field">'+
+      '<label class="yr-label">'+esc(yr)+'</label>'+
+      '<input type="text" data-bind="timeline" data-key="'+esc(yr)+'" value="'+esc(val)+'">'+
+      (state.timelineRevealed ? '<p class="answer">'+esc(answerForYear(yr,L))+'</p>' : '')+
+    '</div>';
+  });
+  h += '<button class="btn btn-reveal-all" onclick="revealTimeline()">'+esc(p.revealAll)+'</button>';
+  return h;
+}
+
+function renderThreadsTest(){
+  const L = state.lang, p = PREP[L];
+  let h = '<p class="intro">'+esc(p.thIntro)+'</p>';
+  THREADS[L].forEach(t=>{
+    const val = state.threads[t.n]||'';
+    h += '<div class="field">'+
+      '<label>'+esc(p.threadLabel)+' '+t.n+' — '+esc(t.title)+'</label>'+
+      '<textarea data-bind="thread" data-key="'+t.n+'">'+esc(val)+'</textarea>'+
+      (state.threadRevealed[t.n]
+        ? '<p class="answer">'+esc(t.body)+'</p>'
+        : '<div style="margin-top:8px"><button class="btn ghost" onclick="revealThread('+t.n+')">'+esc(p.reveal)+'</button></div>')+
+    '</div>';
+  });
+  return h;
+}
+
+function renderNote(){
+  const L = state.lang, p = PREP[L];
+  const val = state.freeWrite||'';
+  return '<div class="field">'+
+    '<label>'+esc(p.noteLabel)+'</label>'+
+    '<textarea class="big" data-bind="freewrite">'+esc(val)+'</textarea>'+
+    '<div class="charcount"><span id="charnum">'+val.length+'</span> '+esc(p.chars)+'</div>'+
+  '</div>';
+}
+
+function renderProverbs(){
+  const L = state.lang, p = PREP[L];
+  let h = '<p class="section-head" style="color:var(--warm-dark)">'+esc(p.pvTitle)+'</p>';
+  h += '<p class="intro">'+esc(p.pvIntro)+'</p>';
+  PROVERBS[L].forEach((txt,i)=>{
+    const on = !!state.proverbs[i];
+    h += '<div class="check-row'+(on?' checked':'')+'">'+
+      '<input type="checkbox" id="pv'+i+'" data-bind="proverb" data-key="'+i+'"'+(on?' checked':'')+'>'+
+      '<label for="pv'+i+'">'+esc(txt)+'</label>'+
+    '</div>';
+  });
+  return h;
+}
+
+/* ---- Section 3: Paintings ---- */
+function paintingCard(p,L){
+  const d = p[L];
+  const id = 'p'+p.obs;
+  const open = state.accordion[id];
+  const chips = p.threads.map(k=>'<span class="chip">'+esc(THREAD_CHIP[L][k])+'</span>').join('');
+  const bullets = d.lookfor.map(li=>'<li>'+esc(li)+'</li>').join('');
+  const body =
+    '<div class="depth">'+
+      '<div class="depth-top"><span class="depth-label">'+esc(UI[L].depthLabel)+'</span>'+
+      '<span class="depth-pct">'+p.depth+'%</span></div>'+
+      '<div class="bar"><div class="bar-fill" style="width:'+p.depth+'%"></div></div>'+
+    '</div>'+
+    '<div class="chips">'+chips+'</div>'+
+    '<p>'+esc(d.whatis)+'</p>'+
+    '<p class="subhead">'+esc(UI[L].lookForHead)+'</p>'+
+    '<ul class="lookfor">'+bullets+'</ul>'+
+    '<div class="context"><p class="subhead">'+esc(UI[L].contextHead)+'</p><p>'+esc(d.context)+'</p></div>'+
+    '<div class="obsreminder">notebook → obs. '+p.obs+'</div>';
+  return '<div class="card pcard'+(open?' open':'')+'" id="card-'+p.obs+'">'+
+    '<div class="card-header pheader" onclick="toggleCard(\''+id+'\')">'+
+      '<div><span class="obs">obs. '+p.obs+'</span><h2>'+esc(d.title)+'</h2>'+
+      '<span class="pyear">'+esc(p.year)+'</span></div>'+chevron+
+    '</div>'+
+    '<div class="card-body">'+body+'</div>'+
+  '</div>';
+}
+
+function renderPaintings(){
+  const L = state.lang;
+  let h = '<div class="subnav"><div class="subnav-inner">'+
+    PAINTINGS.map(p=>'<button class="pill" onclick="jumpTo(\''+p.obs+'\')">'+p.obs+'</button>').join('')+
+  '</div></div>';
+  let lastGroup = -1;
+  PAINTINGS.forEach(p=>{
+    if(p.group!==lastGroup){
+      h += '<div class="group-divider">'+esc(GROUP_HEADERS[L][p.group])+'</div>';
+      lastGroup = p.group;
+    }
+    h += paintingCard(p,L);
+  });
+  return h;
+}
+
+/* ---- Section 4: Checklist ---- */
+function renderChecklist(){
+  const L = state.lang, t = CL[L];
+  let h = '<p class="section-head" style="color:var(--warm-dark)">'+esc(t.title)+'</p>';
+  h += '<p class="intro">'+esc(t.intro)+'</p>';
+  let lastGroup = -1;
+  PAINTINGS.forEach(p=>{
+    if(p.group!==lastGroup){
+      h += '<div class="cl-group">'+esc(GROUP_HEADERS[L][p.group])+'</div>';
+      lastGroup = p.group;
+    }
+    const on = !!state.checklist[p.obs];
+    h += '<div class="cl-row'+(on?' checked':'')+'">'+
+      '<input type="checkbox" id="cl'+p.obs+'" data-bind="checklist" data-key="'+p.obs+'"'+(on?' checked':'')+'>'+
+      '<label for="cl'+p.obs+'">'+esc(p.de.title)+' ('+esc(p.en.title)+')</label>'+
+      '<span class="cl-obs">obs. '+p.obs+'</span>'+
+    '</div>';
+  });
+  const done = PAINTINGS.filter(p=>state.checklist[p.obs]).length;
+  h += '<div class="cl-progress">'+
+    '<span class="cl-count">'+done+'/12 '+esc(t.count)+'</span>'+
+    '<div class="bar"><div class="bar-fill" style="width:'+(done/12*100)+'%"></div></div>'+
+    (done===12 ? '<p class="cl-congrats">'+esc(t.congrats)+'</p>' : '')+
+  '</div>';
+  return h;
+}
+
+/* ---- Section 5: About ---- */
+function renderAbout(){
+  const L = state.lang, a = ABOUT[L];
+  let h = '<div class="about-card about">';
+  a.p.forEach(par=>{ h += '<p>'+esc(par)+'</p>'; });
+  h += '<p>'+a.tip+'</p>';
+  h += '<p style="margin-bottom:6px"><strong>'+esc(a.threadsTitle)+'</strong></p>';
+  h += '<ul class="about-threads">'+a.threads.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>';
+  h += '</div>';
+  return h;
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+function setLang(lang){ state.lang = lang; render(); }
+function setSection(s){ state.section = s; render(); }
+function setTab(t){ state.prepareTab = t; render(); }
+function toggleCard(id){ state.accordion[id] = !state.accordion[id]; render(); }
+function revealTimeline(){ state.timelineRevealed = true; render(); }
+function revealThread(n){ state.threadRevealed[n] = true; render(); }
+function jumpTo(letter){
+  state.accordion['p'+letter] = true;
+  render();
+  requestAnimationFrame(()=>{
+    const el = document.getElementById('card-'+letter);
+    if(!el) return;
+    const headerH = document.querySelector('header').offsetHeight;
+    const sub = document.querySelector('.subnav');
+    const subH = sub ? sub.offsetHeight : 0;
+    const y = el.getBoundingClientRect().top + window.scrollY - headerH - subH - 8;
+    window.scrollTo({top:y, behavior:'smooth'});
+  });
+}
+
+/* ---- Input binding (no full re-render while typing) ---- */
+document.getElementById('content').addEventListener('input', e=>{
+  const el = e.target;
+  const bind = el.getAttribute && el.getAttribute('data-bind');
+  if(!bind) return;
+  if(bind==='timeline'){ state.timeline[el.getAttribute('data-key')] = el.value; }
+  else if(bind==='thread'){ state.threads[el.getAttribute('data-key')] = el.value; }
+  else if(bind==='freewrite'){
+    state.freeWrite = el.value;
+    const c = document.getElementById('charnum');
+    if(c) c.textContent = el.value.length;
+  }
+});
+document.getElementById('content').addEventListener('change', e=>{
+  const el = e.target;
+  const bind = el.getAttribute && el.getAttribute('data-bind');
+  if(bind==='proverb'){
+    state.proverbs[el.getAttribute('data-key')] = el.checked;
+    const row = el.closest('.check-row');
+    if(row) row.classList.toggle('checked', el.checked);
+  } else if(bind==='checklist'){
+    state.checklist[el.getAttribute('data-key')] = el.checked;
+    render();
+  }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+render();
+</script>
+</body>
+</html>
