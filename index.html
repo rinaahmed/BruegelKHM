@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#3B2110">
+<meta name="theme-color" content="#0E3A40">
 <title>Bruegel im KHM / Bruegel at the KHM</title>
 <style>
   :root{
-    --ink:#1C1208;
-    --warm-dark:#3B2110;
-    --rust:#7A4020;
-    --ochre:#B87333;
-    --parchment:#F6F0E4;
-    --cream:#FBF8F2;
-    --divider:#D4C4A8;
-    --muted:#8A7560;
+    --ink:#16242A;
+    --warm-dark:#0E3A40;
+    --rust:#946513;
+    --ochre:#C9912E;
+    --on-accent:#1B1200;
+    --parchment:#EFEAE0;
+    --cream:#FBF9F4;
+    --divider:#D9D0C0;
+    --muted:#6E8186;
     --serif:Georgia,'Times New Roman',serif;
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   }
@@ -66,7 +67,7 @@
     letter-spacing:.5px;
     padding:6px 12px;
     border-radius:999px;
-    border:1px solid rgba(246,240,228,.4);
+    border:1px solid rgba(251,249,244,.4);
     background:transparent;
     color:var(--cream);
     cursor:pointer;
@@ -75,7 +76,7 @@
   .lang-toggle button.active{
     background:var(--ochre);
     border-color:var(--ochre);
-    color:#fff;
+    color:var(--on-accent);
   }
 
   /* ---------- Content ---------- */
@@ -259,7 +260,7 @@
   input[type=text]:focus,textarea:focus{
     outline:none;
     border-color:var(--ochre);
-    box-shadow:0 0 0 2px rgba(184,115,51,.15);
+    box-shadow:0 0 0 2px rgba(201,145,46,.20);
   }
   textarea{min-height:90px;line-height:1.5;}
   textarea.big{min-height:200px;}
@@ -279,7 +280,7 @@
     border-radius:8px;
     border:1px solid var(--ochre);
     background:var(--ochre);
-    color:#fff;
+    color:var(--on-accent);
     cursor:pointer;
   }
   .btn.ghost{
@@ -403,7 +404,7 @@
   .pheader .pyear{
     font-family:var(--sans);
     font-size:12px;
-    color:rgba(246,240,228,.65);
+    color:rgba(251,249,244,.65);
   }
   .pheader .chev{margin-top:4px;}
   .fav-btn{
@@ -414,7 +415,7 @@
     margin:0 2px 0 4px;
     cursor:pointer;
     line-height:0;
-    color:rgba(246,240,228,.55);
+    color:rgba(251,249,244,.55);
     -webkit-tap-highlight-color:transparent;
   }
   .fav-btn.on{color:var(--ochre);}
@@ -438,8 +439,9 @@
     cursor:pointer;
     -webkit-tap-highlight-color:transparent;
   }
-  .fav-filter.on{background:var(--ochre);border-color:var(--ochre);color:var(--cream);}
+  .fav-filter.on{background:var(--ochre);border-color:var(--ochre);color:var(--on-accent);}
   .fav-filter .heart-svg{width:16px;height:16px;}
+
   .tts-btn{
     display:inline-flex;
     align-items:center;
@@ -459,7 +461,7 @@
     -webkit-tap-highlight-color:transparent;
   }
   .tts-btn .tts-svg{display:block;width:16px;height:16px;}
-  .tts-btn.on{background:var(--ochre);border-color:var(--ochre);color:var(--cream);}
+  .tts-btn.on{background:var(--ochre);border-color:var(--ochre);color:var(--on-accent);}
   .depth{margin-bottom:14px;}
   .depth-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
   .depth-label{
@@ -606,7 +608,7 @@
     left:0;top:1px;
     width:20px;height:20px;
     background:var(--ochre);
-    color:#fff;
+    color:var(--on-accent);
     border-radius:50%;
     font-family:var(--sans);
     font-size:12px;
@@ -647,7 +649,7 @@
 
   /* ---------- Notebook (aggregated notes) ---------- */
   .warn{
-    background:#F3E4D0;
+    background:#F7ECCF;
     border:1px solid var(--ochre);
     color:var(--rust);
     border-radius:8px;
@@ -743,7 +745,7 @@
     min-width:0;
     background:transparent;
     border:none;
-    color:rgba(246,240,228,.6);
+    color:rgba(251,249,244,.6);
     font-family:var(--sans);
     font-size:10px;
     font-weight:600;
@@ -792,7 +794,7 @@
     border-radius:12px;
     padding:6px;
     min-width:172px;
-    box-shadow:0 8px 28px rgba(28,18,8,.28);
+    box-shadow:0 8px 28px rgba(8,34,38,.30);
     animation:menuPop .14s ease-out;
   }
   @keyframes menuPop{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
