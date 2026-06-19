@@ -440,6 +440,26 @@
   }
   .fav-filter.on{background:var(--ochre);border-color:var(--ochre);color:var(--cream);}
   .fav-filter .heart-svg{width:16px;height:16px;}
+  .tts-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    margin:0 0 12px;
+    height:34px;
+    padding:0 14px 0 11px;
+    font-family:var(--sans);
+    font-size:12.5px;
+    font-weight:700;
+    letter-spacing:.02em;
+    border-radius:17px;
+    border:1px solid var(--divider);
+    background:var(--parchment);
+    color:var(--rust);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tts-btn .tts-svg{display:block;width:16px;height:16px;}
+  .tts-btn.on{background:var(--ochre);border-color:var(--ochre);color:var(--cream);}
   .depth{margin-bottom:14px;}
   .depth-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
   .depth-label{
@@ -841,6 +861,7 @@ const state = {
   notes: {},                           // obs letter -> {before, after}  (persisted to localStorage)
   favorites: {},                       // obs letter -> true  (persisted to localStorage)
   favFilter: false,                    // Paintings: show favourites only?
+  speakingId: null,                    // Background: id of card being read aloud (not persisted)
   menuOpen: false                      // "More" nav popover open?
 };
 
@@ -920,6 +941,48 @@ const FAV = {
   de:{ toggle:'Als Favorit markieren', filter:'Favoriten', empty:'Noch keine Favoriten. Tippe auf das Herz bei einem Gemälde, um es hier zu speichern.' },
   en:{ toggle:'Mark as favourite', filter:'Favourites', empty:'No favourites yet. Tap the heart on a painting to save it here.' }
 };
+
+/* ---- Read-aloud (text-to-speech) ---- */
+const TTS = {
+  de:{ play:'Vorlesen', stop:'Stopp', lang:'de-DE' },
+  en:{ play:'Read aloud', stop:'Stop', lang:'en-US' }
+};
+const ttsOK = typeof window!=='undefined' && 'speechSynthesis' in window;
+function ttsIcon(playing){
+  return '<svg class="tts-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'+
+    (playing ? '<rect x="6" y="6" width="12" height="12" rx="1.5"/>'
+             : '<path d="M8 5v14l11-7z"/>')+'</svg>';
+}
+function ttsVoice(langCode){
+  if(!ttsOK) return null;
+  const want = langCode.slice(0,2).toLowerCase();
+  const voices = speechSynthesis.getVoices() || [];
+  return voices.find(v=>(v.lang||'').toLowerCase().startsWith(want)) || null;
+}
+function stopSpeech(){
+  if(!ttsOK) return;
+  state.speakingId = null;
+  try{ speechSynthesis.cancel(); }catch(e){}
+}
+function speakSection(id, text){
+  if(!ttsOK) return;
+  if(state.speakingId === id){ stopSpeech(); render(); return; }
+  try{ speechSynthesis.cancel(); }catch(e){}
+  const t = TTS[state.lang];
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = t.lang;
+  const v = ttsVoice(t.lang);
+  if(v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = u.onerror = ()=>{ if(state.speakingId===id){ state.speakingId=null; render(); } };
+  state.speakingId = id;
+  speechSynthesis.speak(u);
+  render();
+}
+/* Some browsers load voices asynchronously; warm the list. */
+if(ttsOK && typeof speechSynthesis.onvoiceschanged !== 'undefined'){
+  speechSynthesis.onvoiceschanged = ()=>{ speechSynthesis.getVoices(); };
+}
 
 /* ---- Timeline data ---- */
 const TIMELINE = {
@@ -1439,33 +1502,45 @@ function renderMenu(){
     '</div></div>';
 }
 
-function accCard(id,title,bodyHtml){
+function accCard(id,title,bodyHtml,speakText){
   const open = state.accordion[id];
+  let btn = '';
+  if(ttsOK && speakText){
+    const playing = state.speakingId === id;
+    const t = TTS[state.lang];
+    btn = '<button class="tts-btn'+(playing?' on':'')+'" type="button"'+
+      ' onclick="speakSection(\''+id+'\',this.dataset.text)"'+
+      ' data-text="'+esc(speakText)+'"'+
+      ' aria-pressed="'+playing+'">'+ttsIcon(playing)+
+      '<span>'+esc(playing?t.stop:t.play)+'</span></button>';
+  }
   return '<div class="card'+(open?' open':'')+'">'+
     '<div class="card-header" onclick="toggleCard(\''+id+'\')">'+
       '<h2>'+esc(title)+'</h2>'+chevron+
     '</div>'+
-    '<div class="card-body">'+bodyHtml+'</div>'+
+    '<div class="card-body">'+btn+bodyHtml+'</div>'+
   '</div>';
 }
 
 function renderBackground(){
   const L = state.lang, c = CARDS[L];
+  const say = (...parts)=>parts.filter(s=>s&&s.trim()).join('. ');
   let h = '';
-  h += accCard('c1', c.c1.title, '<p>'+esc(c.c1.body)+'</p>');
+  h += accCard('c1', c.c1.title, '<p>'+esc(c.c1.body)+'</p>', say(c.c1.title, c.c1.body));
 
   // Card 2 — visual timeline
   const tl = TIMELINE[L].map(r=>
     '<div class="timeline-row"><div class="yr">'+esc(r.year)+'</div>'+
     '<div class="ev">'+esc(r.event)+'</div></div>'
   ).join('');
-  h += accCard('c2', c.c2title, '<div class="timeline">'+tl+'</div>');
+  const tlSpeak = say(c.c2title, ...TIMELINE[L].map(r=>r.year+': '+r.event));
+  h += accCard('c2', c.c2title, '<div class="timeline">'+tl+'</div>', tlSpeak);
 
-  h += accCard('c3', c.c3.title, '<p>'+esc(c.c3.body)+'</p>');
-  h += accCard('c4', c.c4.title, '<p>'+esc(c.c4.body)+'</p>');
-  h += accCard('c5', c.c5.title, '<p>'+esc(c.c5.body)+'</p>');
-  h += accCard('c6', c.c6.title, '<p>'+esc(c.c6.body)+'</p>');
-  h += accCard('c7', c.c7.title, '<p>'+esc(c.c7.body)+'</p>');
+  h += accCard('c3', c.c3.title, '<p>'+esc(c.c3.body)+'</p>', say(c.c3.title, c.c3.body));
+  h += accCard('c4', c.c4.title, '<p>'+esc(c.c4.body)+'</p>', say(c.c4.title, c.c4.body));
+  h += accCard('c5', c.c5.title, '<p>'+esc(c.c5.body)+'</p>', say(c.c5.title, c.c5.body));
+  h += accCard('c6', c.c6.title, '<p>'+esc(c.c6.body)+'</p>', say(c.c6.title, c.c6.body));
+  h += accCard('c7', c.c7.title, '<p>'+esc(c.c7.body)+'</p>', say(c.c7.title, c.c7.body));
 
   // Card 8 — four threads
   const tnumLabel = (L==='de'?'Faden':'Thread');
@@ -1476,7 +1551,8 @@ function renderBackground(){
       '<p>'+esc(t.body)+'</p>'+
     '</div>'
   ).join('');
-  h += accCard('c8', c.c8title, blocks);
+  const c8Speak = say(c.c8title, ...THREADS[L].map(t=>t.title+'. '+t.body));
+  h += accCard('c8', c.c8title, blocks, c8Speak);
 
   return h;
 }
@@ -1744,13 +1820,17 @@ function buildNotesText(L){
 /* ============================================================
    ACTIONS
    ============================================================ */
-function setLang(lang){ state.lang = lang; render(); }
-function setSection(s){ state.section = s; state.menuOpen = false; render(); }
+function setLang(lang){ stopSpeech(); state.lang = lang; render(); }
+function setSection(s){ stopSpeech(); state.section = s; state.menuOpen = false; render(); }
 function toggleMenu(e){ if(e) e.stopPropagation(); state.menuOpen = !state.menuOpen; renderNav(); }
 function closeMenu(){ state.menuOpen = false; renderNav(); }
 function setTab(t){ state.prepareTab = t; render(); }
 function gotoPrep(){ state.section = 'prepare'; state.prepareTab = 'note'; state.menuOpen = false; render(); window.scrollTo({top:0}); }
-function toggleCard(id){ state.accordion[id] = !state.accordion[id]; render(); }
+function toggleCard(id){
+  state.accordion[id] = !state.accordion[id];
+  if(state.speakingId===id && !state.accordion[id]) stopSpeech();
+  render();
+}
 function revealTimeline(){ state.timelineRevealed = true; render(); }
 function revealThread(n){ state.threadRevealed[n] = true; render(); }
 function jumpTo(letter){
