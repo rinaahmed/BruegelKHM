@@ -1678,7 +1678,8 @@ function renderNotebook(){
   if(!storageOK) h += '<div class="warn">'+esc(t.storageWarn)+'</div>';
   const noted = notedPaintings();
   const freeWrite = (state.freeWrite || '').trim();
-  const hasContent = noted.length > 0 || freeWrite.length > 0;
+  const hasFavs = PAINTINGS.some(p=>state.favorites[p.obs]);
+  const hasContent = noted.length > 0 || freeWrite.length > 0 || hasFavs;
   h += '<div class="notes-toolbar">'+
     '<button class="btn" onclick="exportNotes()"'+(hasContent?'':' disabled')+'>'+esc(t.export)+'</button>'+
     '<button class="btn ghost" id="copybtn" onclick="copyNotes()"'+(hasContent?'':' disabled')+'>'+esc(t.copy)+'</button>'+
@@ -1722,11 +1723,17 @@ function buildNotesText(L){
     lines.push(fw);
     lines.push('');
   }
+  const favs = PAINTINGS.filter(p=>state.favorites[p.obs]);
+  if(favs.length){
+    lines.push(FAV[L].filter + ':');
+    favs.forEach(p=>{ lines.push('♥ obs. '+p.obs+' — '+p[L].title+' — '+p.year); });
+    lines.push('');
+  }
   PAINTINGS.forEach(p=>{
     const n = state.notes[p.obs];
     if(!n || !((n.before&&n.before.trim())||(n.after&&n.after.trim()))) return;
     const d = p[L];
-    lines.push('obs. '+p.obs+' — '+d.title+' — '+p.year);
+    lines.push((state.favorites[p.obs]?'♥ ':'')+'obs. '+p.obs+' — '+d.title+' — '+p.year);
     if(n.before&&n.before.trim()){ lines.push(OBS[L].before+':'); lines.push(n.before.trim()); }
     if(n.after&&n.after.trim()){ lines.push(OBS[L].after+':'); lines.push(n.after.trim()); }
     lines.push('');
