@@ -31,6 +31,15 @@ A **Mehr / More** popover holds the secondary sections to keep the bar to five i
 - **Notizen / Notes** — an aggregated view of everything you've written, with export.
 - **Über / About** — practical info and a recap of the four threads.
 
+### Install & offline (PWA)
+
+The app is an installable **Progressive Web App**. On a phone you can add it to your
+home screen ("Add to Home Screen" / "Install app"); it then launches full-screen with
+its own icon. A service worker caches the whole app on first load, so it runs **fully
+offline** in the gallery — no signal needed in front of the paintings. Because the app
+is a single file with thumbnails embedded as base64, the cached payload is small and
+self-contained.
+
 ### The four threads
 
 A reading lens applied across every painting:
@@ -97,8 +106,9 @@ Every push to `main` deploys to production; pull requests get preview environmen
 - **Bilingual** — DE/EN toggle in the header switches *all* text instantly; default is DE.
 - **Typography** — Georgia (serif) for reading content, system UI sans-serif for labels
   and chrome.
-- **Offline-friendly** — painting thumbnails are embedded directly in the file as
-  base64, so the app works without a network connection in the gallery.
+- **Offline-friendly** — installable PWA; a service worker (`sw.js`) precaches the app
+  and painting thumbnails are embedded directly in the file as base64, so it works with
+  no network connection in the gallery.
 - **Privacy** — no analytics, no cookies, no external requests at runtime. Your notes
   never leave your device unless you export them yourself.
 
@@ -116,7 +126,11 @@ see [insidebruegel.net](https://insidebruegel.net).
 ## Repository layout
 
 ```
-index.html   # the entire application
-.github/     # Azure Static Web Apps deploy workflow
-README.md    # this file
+index.html              # the entire application
+manifest.webmanifest    # PWA manifest (install metadata)
+sw.js                   # service worker (offline precache)
+icon-*.png              # app / install icons
+apple-touch-icon.png    # iOS home-screen icon
+.github/                # Azure Static Web Apps deploy workflow
+README.md               # this file
 ```
